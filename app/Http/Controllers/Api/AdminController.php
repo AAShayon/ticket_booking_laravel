@@ -21,6 +21,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="id", type="integer", format="int64", example=1),
  *     @OA\Property(property="name", type="string", example="Admin User"),
  *     @OA\Property(property="email", type="string", format="email", example="admin@example.com"),
+ *     @OA\Property(property="profile_image", type="string", nullable=true, example="uploads/profile.jpg"),
  *     @OA\Property(property="role", type="string", example="admin"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
@@ -68,6 +69,39 @@ class AdminController extends Controller
     {
         $users = User::all();
         return response()->json($users);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/admin/users/{user}",
+     *     tags={"Admin"},
+     *     summary="Get a specific user by ID (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the user to retrieve"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/AdminUser")
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *     )
+     * )
+     */
+    public function showUser(User $user)
+    {
+        return response()->json($user);
     }
 
     /**

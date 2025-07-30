@@ -36,9 +36,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/payments/initiate/{booking}', [PaymentController::class, 'initiatePayment']);
 
+    Route::post('/profile', [App\Http\Controllers\Api\ProfileController::class, 'update']);
+
     // Admin Routes
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/users', [AdminController::class, 'getUsers']);
+        Route::get('/admin/users/{user}', [AdminController::class, 'showUser']);
         Route::post('/admin/users', [AdminController::class, 'createUser']);
         Route::put('/admin/users/{user}', [AdminController::class, 'updateUser']);
         Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser']);
