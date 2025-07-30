@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Pnr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use OpenApi\Annotations as OA;
@@ -134,7 +135,13 @@ class PaymentController extends Controller
             $payment->save();
             $payment->booking->status = 'confirmed';
             $payment->booking->save();
-            return response()->json(['message' => 'Payment successful', 'payment' => $payment]);
+
+            $pnr = \App\Models\Pnr::create([
+                'booking_id' => $payment->booking->id,
+                'pnr_number' => generatePnr(),
+            ]);
+
+            return response()->json(['message' => 'Payment successful', 'payment' => $payment, 'pnr' => $pnr]);
         }
 
         return response()->json(['message' => 'Payment not found'], 404);
@@ -255,7 +262,13 @@ class PaymentController extends Controller
             $payment->save();
             $payment->booking->status = 'confirmed';
             $payment->booking->save();
-            return response()->json(['message' => 'IPN received and processed']);
+
+            $pnr = \App\Models\Pnr::create([
+                'booking_id' => $payment->booking->id,
+                'pnr_number' => generatePnr(),
+            ]);
+
+            return response()->json(['message' => 'IPN received and processed', 'pnr' => $pnr]);
         }
 
         return response()->json(['message' => 'Payment not found'], 404);
