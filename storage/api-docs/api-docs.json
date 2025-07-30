@@ -892,6 +892,546 @@
                 ]
             }
         },
+        "/operators": {
+            "get": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Get all bus operators (Admin only)",
+                "operationId": "b542fbe4e0ca4a01b41954e1754dcc45",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Create a new bus operator (Admin only)",
+                "operationId": "206ab19bdc3e167630fb2e0e33fb6194",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Green Line Paribahan"
+                                    },
+                                    "contact_email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "contact@greenline.com"
+                                    },
+                                    "contact_phone": {
+                                        "type": "string",
+                                        "example": "+8801XXXXXXXXX"
+                                    },
+                                    "admin_commission_percentage": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Operator created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Operator"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/operators/{id}": {
+            "get": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Get a specific bus operator by ID (Admin only)",
+                "operationId": "939c60b1f2cb60475022d48f6a99bb5b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Operator"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Update a specific bus operator by ID (Admin only)",
+                "operationId": "6c4b5ac86ffdcdc5bc1749324b105aee",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Green Line Paribahan Updated"
+                                    },
+                                    "admin_commission_percentage": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 12.5
+                                    },
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Operator updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Operator"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Delete a bus operator by ID (Admin only)",
+                "operationId": "7e31bf66537f491aa6548845c454762c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Operator deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/operator-requests": {
+            "post": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Submit a new operator request",
+                "operationId": "33c733cef4e69951ff636000e048991e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "operator_name",
+                                    "route_details",
+                                    "fare_details",
+                                    "admin_commission_percentage"
+                                ],
+                                "properties": {
+                                    "operator_name": {
+                                        "type": "string",
+                                        "example": "New Bus Operator"
+                                    },
+                                    "route_details": {
+                                        "type": "string",
+                                        "example": "Dhaka to Sylhet"
+                                    },
+                                    "fare_details": {
+                                        "type": "string",
+                                        "example": "BDT 1000"
+                                    },
+                                    "admin_commission_percentage": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Operator request submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequest"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/operator-requests": {
+            "get": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Get all operator requests (Admin only)",
+                "operationId": "c0a07c7614ecf58b698634b5ff19408b",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequestList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/operator-requests/{id}": {
+            "get": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Get a specific operator request by ID (Admin only)",
+                "operationId": "0788b78a86aa8b6945e9ebf27195df8a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator request to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequest"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator request not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/operator-requests/{id}/approve": {
+            "post": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Approve an operator request (Admin only)",
+                "operationId": "2eb9652021ed33c2a23e7ebe5405bc06",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator request to approve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operator request approved and operator created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Operator request approved and operator created"
+                                        },
+                                        "operator": {
+                                            "$ref": "#/components/schemas/Operator"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator request not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/operator-requests/{id}/reject": {
+            "post": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Reject an operator request (Admin only)",
+                "operationId": "f5fe039b979d88955de46bc02fa69b3e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator request to reject",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operator request rejected",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequest"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator request not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/payments/initiate/{booking}": {
             "post": {
                 "tags": [
@@ -1222,6 +1762,275 @@
                     }
                 ]
             }
+        },
+        "/routes": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get all bus routes (Admin only)",
+                "operationId": "c68358eb774e93b2568381321560fad2",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BusRouteList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Create a new bus route (Admin only)",
+                "operationId": "59805421dd9044f42e1812a773e56cd0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "operator_id",
+                                    "origin",
+                                    "destination",
+                                    "fare"
+                                ],
+                                "properties": {
+                                    "operator_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "origin": {
+                                        "type": "string",
+                                        "example": "Dhaka"
+                                    },
+                                    "destination": {
+                                        "type": "string",
+                                        "example": "Chittagong"
+                                    },
+                                    "fare": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1200
+                                    },
+                                    "estimated_travel_time": {
+                                        "type": "string",
+                                        "example": "6 hours"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Route created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BusRoute"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/routes/{id}": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get a specific bus route by ID (Admin only)",
+                "operationId": "9cd1462e95a599838ac04f474f8bdc41",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the route to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BusRoute"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Update a specific bus route by ID (Admin only)",
+                "operationId": "8d3291cf5bc60fcde0f0767baca12d50",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the route to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "origin": {
+                                        "type": "string",
+                                        "example": "Sylhet"
+                                    },
+                                    "fare": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1500
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Route updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BusRoute"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Delete a bus route by ID (Admin only)",
+                "operationId": "584ff9a6d16d1381447f6dcd100c4eb7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the route to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Route deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -1373,6 +2182,143 @@
                     }
                 ]
             },
+            "Operator": {
+                "title": "Operator",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Green Line Paribahan"
+                            },
+                            "contact_email": {
+                                "type": "string",
+                                "format": "email",
+                                "example": "contact@greenline.com"
+                            },
+                            "contact_phone": {
+                                "type": "string",
+                                "example": "+8801XXXXXXXXX"
+                            },
+                            "admin_commission_percentage": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 10
+                            },
+                            "user_id": {
+                                "description": "ID of the user who owns/manages this operator",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "OperatorList": {
+                "title": "Operator List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/Operator"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
+            "OperatorRequest": {
+                "title": "Operator Request",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "user_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "operator_name": {
+                                "type": "string",
+                                "example": "New Bus Operator"
+                            },
+                            "route_details": {
+                                "type": "string",
+                                "example": "Dhaka to Chittagong"
+                            },
+                            "fare_details": {
+                                "type": "string",
+                                "example": "BDT 1200"
+                            },
+                            "admin_commission_percentage": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 10
+                            },
+                            "status": {
+                                "type": "string",
+                                "enum": [
+                                    "pending",
+                                    "approved",
+                                    "rejected"
+                                ],
+                                "example": "pending"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "OperatorRequestList": {
+                "title": "Operator Request List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/OperatorRequest"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
             "Payment": {
                 "title": "Payment",
                 "type": "object",
@@ -1424,6 +2370,69 @@
                     }
                 ]
             },
+            "BusRoute": {
+                "title": "Bus Route",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "operator_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "origin": {
+                                "type": "string",
+                                "example": "Dhaka"
+                            },
+                            "destination": {
+                                "type": "string",
+                                "example": "Chittagong"
+                            },
+                            "fare": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 1200
+                            },
+                            "estimated_travel_time": {
+                                "type": "string",
+                                "example": "6 hours"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "BusRouteList": {
+                "title": "Bus Route List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/BusRoute"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
             "ValidationError": {
                 "title": "Validation Error",
                 "properties": {
@@ -1468,12 +2477,24 @@
             "description": "API Endpoints for Booking Management"
         },
         {
+            "name": "Operators",
+            "description": "API Endpoints for Bus Operator Management (Admin Only)"
+        },
+        {
+            "name": "Operator Requests",
+            "description": "API Endpoints for Managing Bus Operator Requests"
+        },
+        {
             "name": "Payments",
             "description": "API Endpoints for Payment Processing"
         },
         {
             "name": "Profile",
             "description": "API Endpoints for User Profile Management"
+        },
+        {
+            "name": "Routes",
+            "description": "API Endpoints for Bus Route Management (Admin Only)"
         }
     ]
 }

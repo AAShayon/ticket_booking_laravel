@@ -49,8 +49,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function bookings()
+    public function operatorRequests()
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(OperatorRequest::class);
     }
 }

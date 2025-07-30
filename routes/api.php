@@ -6,6 +6,9 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\OperatorController;
+use App\Http\Controllers\Api\RouteController;
+use App\Http\Controllers\Api\OperatorRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/profile', [App\Http\Controllers\Api\ProfileController::class, 'update']);
 
+    // Operator Requests (User can submit)
+    Route::post('/operator-requests', [OperatorRequestController::class, 'store']);
+
     // Admin Routes
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/users', [AdminController::class, 'getUsers']);
@@ -49,5 +55,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/bookings', [AdminController::class, 'getAllBookings']);
         Route::put('/admin/bookings/{booking}/status', [AdminController::class, 'updateBookingStatus']);
         Route::delete('/admin/bookings/{booking}', [AdminController::class, 'deleteBooking']);
+
+        // Operator Management
+        Route::apiResource('/operators', OperatorController::class);
+
+        // Route Management
+        Route::apiResource('/routes', RouteController::class);
+
+        // Operator Request Management
+        Route::get('/admin/operator-requests', [OperatorRequestController::class, 'index']);
+        Route::get('/admin/operator-requests/{operatorRequest}', [OperatorRequestController::class, 'show']);
+        Route::post('/admin/operator-requests/{operatorRequest}/approve', [OperatorRequestController::class, 'approve']);
+        Route::post('/admin/operator-requests/{operatorRequest}/reject', [OperatorRequestController::class, 'reject']);
     });
 });
