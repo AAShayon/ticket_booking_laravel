@@ -1,0 +1,332 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Booking;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use OpenApi\Annotations as OA;
+
+/**
+ * @OA\Tag(
+ *      name="Admin",
+ *      description="API Endpoints for Admin Management"
+ * )
+ *
+ * @OA\Schema(
+ *     schema="AdminUser",
+ *     title="Admin User",
+ *     @OA\Property(property="id", type="integer", format="int64", example=1),
+ *     @OA\Property(property="name", type="string", example="Admin User"),
+ *     @OA\Property(property="email", type="string", format="email", example="admin@example.com"),
+ *     @OA\Property(property="role", type="string", example="admin"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
+ * )
+ *
+ * @OA\Schema(
+ *     schema="AdminUserList",
+ *     title="Admin User List",
+ *     type="array",
+ *     @OA\Items(ref="#/components/schemas/AdminUser")
+ * )
+ *
+ * @OA\Schema(
+ *     schema="AdminBookingList",
+ *     title="Admin Booking List",
+ *     type="array",
+ *     @OA\Items(ref="#/components/schemas/Booking")
+ * )
+ */
+class AdminController extends Controller
+{
+    // User Management
+    /**
+     * @OA\Get(
+     *     path="/admin/users",
+     *     tags={"Admin"},
+     *     summary="Get all users (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/AdminUserList")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *     )
+     * )
+     */
+    public function getUsers()
+    {
+        $users = User::all();
+        return response()->json($users);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/admin/users",
+     *     tags={"Admin"},
+     *     summary="Create a new user (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","role"},
+     *             @OA\Property(property="name", type="string", example="New Admin"),
+     *             @OA\Property(property="email", type="string", format="email", example="newadmin@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password"),
+     *             @OA\Property(property="role", type="string", example="admin", enum={"user", "admin"}),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/AdminUser")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *     )
+     * )
+     */
+    public function createUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role' => 'required|string|in:user,admin',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+        ]);
+
+        return response()->json($user, 201);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/admin/users/{user}",
+     *     tags={"Admin"},
+     *     summary="Update an existing user (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the user to update"
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Updated Name"),
+     *             @OA\Property(property="email", type="string", format="email", example="updated@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="new_password"),
+     *             @OA\Property(property="role", type="string", example="admin", enum={"user", "admin"}),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/AdminUser")
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     )
+     * )
+     */
+    public function updateUser(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'sometimes|required|string|min:8',
+            'role' => 'sometimes|required|string|in:user,admin',
+        ]);
+
+        if ($request->has('password')) {
+            $request->merge(['password' => Hash::make($request->password)]);
+        }
+
+        $user->update($request->all());
+
+        return response()->json($user);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/admin/users/{user}",
+     *     tags={"Admin"},
+     *     summary="Delete a user (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the user to delete"
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="User deleted successfully",
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *     )
+     * )
+     */
+    public function deleteUser(User $user)
+    {
+        $user->delete();
+        return response()->json(null, 204);
+    }
+
+    // Booking Management
+    /**
+     * @OA\Get(
+     *     path="/admin/bookings",
+     *     tags={"Admin"},
+     *     summary="Get all bookings (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/AdminBookingList")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *     )
+     * )
+     */
+    public function getAllBookings()
+    {
+        $bookings = Booking::with('user')->get();
+        return response()->json($bookings);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/admin/bookings/{booking}/status",
+     *     tags={"Admin"},
+     *     summary="Update booking status (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="booking",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the booking to update"
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"status"},
+     *             @OA\Property(property="status", type="string", example="confirmed", enum={"pending", "confirmed", "cancelled"}),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Booking status updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/Booking")
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Booking not found",
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     )
+     * )
+     */
+    public function updateBookingStatus(Request $request, Booking $booking)
+    {
+        $request->validate([
+            'status' => 'required|string|in:pending,confirmed,cancelled',
+        ]);
+
+        $booking->update(['status' => $request->status]);
+
+        return response()->json($booking);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/admin/bookings/{booking}",
+     *     tags={"Admin"},
+     *     summary="Delete a booking (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="booking",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the booking to delete"
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Booking deleted successfully",
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Booking not found",
+     *     )
+     * )
+     */
+    public function deleteBooking(Booking $booking)
+    {
+        $booking->delete();
+        return response()->json(null, 204);
+    }
+}
