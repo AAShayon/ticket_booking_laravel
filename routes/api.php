@@ -38,6 +38,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('/bookings', BookingController::class);
 
+    Route::get('/routes/search', [RouteController::class, 'search']);
+
     Route::post('/payments/initiate/{booking}', [PaymentController::class, 'initiatePayment']);
 
     Route::post('/profile', [App\Http\Controllers\Api\ProfileController::class, 'update']);
@@ -77,3 +79,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/operator-requests/{operatorRequest}/reject', [OperatorRequestController::class, 'reject']);
     });
 });
+
+Route::get('/operators', [OperatorController::class, 'publicIndex']);
+Route::get('/routes', [RouteController::class, 'publicIndex']);

@@ -21,6 +21,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="operator_id", type="integer", format="int64", example=1),
  *     @OA\Property(property="model_number", type="string", example="Scania K360"),
  *     @OA\Property(property="type", type="string", example="AC"),
+ *     @OA\Property(property="capacity", type="integer", example=40),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  * )
@@ -110,7 +111,8 @@ class VehicleController extends Controller
      *         @OA\JsonContent(
      *             required={"model_number","type"},
      *             @OA\Property(property="model_number", type="string", example="Scania K360"),
-     *             @OA\Property(property="type", type="string", example="AC"),
+     *             @OA\Property(property="type", type="string", enum={"AC", "Sleeper", "Non-AC", "hyundai", "scania"}, example="AC"),
+     *             @OA\Property(property="capacity", type="integer", example=40),
      *         )
      *     ),
      *     @OA\Response(
@@ -142,7 +144,8 @@ class VehicleController extends Controller
 
         $request->validate([
             'model_number' => 'required|string|max:255',
-            'type' => 'required|string|in:AC,Sleeper,Non-AC',
+            'type' => 'required|string|in:AC,Sleeper,Non-AC,hyundai,scania',
+            'capacity' => 'required|integer|min:1',
         ]);
 
         $vehicle = $operator->vehicles()->create($request->all());
@@ -208,7 +211,8 @@ class VehicleController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="model_number", type="string", example="Volvo 9700"),
-     *             @OA\Property(property="type", type="string", example="Sleeper"),
+     *             @OA\Property(property="type", type="string", enum={"AC", "Sleeper", "Non-AC", "hyundai", "scania"}, example="Sleeper"),
+     *             @OA\Property(property="capacity", type="integer", example=28),
      *         )
      *     ),
      *     @OA\Response(
@@ -244,7 +248,8 @@ class VehicleController extends Controller
 
         $request->validate([
             'model_number' => 'sometimes|required|string|max:255',
-            'type' => 'sometimes|required|string|in:AC,Sleeper,Non-AC',
+            'type' => 'sometimes|required|string|in:AC,Sleeper,Non-AC,hyundai,scania',
+            'capacity' => 'sometimes|required|integer|min:1',
         ]);
 
         $vehicle->update($request->all());

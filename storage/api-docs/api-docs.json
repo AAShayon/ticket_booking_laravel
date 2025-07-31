@@ -14,7 +14,7 @@
     },
     "servers": [
         {
-            "url": "http://my-default-host.com",
+            "url": "http://127.0.0.1:8001/api/staged",
             "description": "Ticket Booking System API Server"
         }
     ],
@@ -955,6 +955,45 @@
                                         "type": "number",
                                         "format": "float",
                                         "example": 10
+                                    },
+                                    "nid": {
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Main St, City"
+                                    },
+                                    "transport_business_license": {
+                                        "type": "string",
+                                        "example": "TBL-12345"
+                                    },
+                                    "vehicles": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "model_number": {
+                                                    "type": "string",
+                                                    "example": "SR112233"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "AC",
+                                                        "non-AC",
+                                                        "sleeper",
+                                                        "hyundai",
+                                                        "scania"
+                                                    ],
+                                                    "example": "AC"
+                                                },
+                                                "capacity": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -995,6 +1034,27 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/operators/public": {
+            "get": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Get all bus operators (Publicly accessible)",
+                "operationId": "ac2af0682ae6b77c531e93802b1e4e57",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorList"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/operators/{id}": {
@@ -1077,6 +1137,18 @@
                                     "user_id": {
                                         "type": "integer",
                                         "example": 1
+                                    },
+                                    "nid": {
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Main St, City"
+                                    },
+                                    "transport_business_license": {
+                                        "type": "string",
+                                        "example": "TBL-12345"
                                     }
                                 },
                                 "type": "object"
@@ -1836,14 +1908,22 @@
                             "schema": {
                                 "required": [
                                     "operator_id",
+                                    "vehicle_id",
                                     "origin",
                                     "destination",
                                     "fare",
+                                    "fare_per_seat",
+                                    "estimated_travel_time",
                                     "vehicle_number",
-                                    "time_of_day"
+                                    "time_of_day",
+                                    "departure_time"
                                 ],
                                 "properties": {
                                     "operator_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "vehicle_id": {
                                         "type": "integer",
                                         "example": 1
                                     },
@@ -1860,6 +1940,11 @@
                                         "format": "float",
                                         "example": 1200
                                     },
+                                    "fare_per_seat": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 500
+                                    },
                                     "estimated_travel_time": {
                                         "type": "string",
                                         "example": "6 hours"
@@ -1871,6 +1956,11 @@
                                     "time_of_day": {
                                         "type": "string",
                                         "example": "morning"
+                                    },
+                                    "departure_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "06:30:00"
                                     }
                                 },
                                 "type": "object"
@@ -1911,6 +2001,27 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/routes/public": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get all bus routes (Publicly accessible)",
+                "operationId": "514cacf4fda2a5b9341d148943ec6aa9",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BusRouteList"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/routes/{id}": {
@@ -1997,6 +2108,20 @@
                                     "time_of_day": {
                                         "type": "string",
                                         "example": "evening"
+                                    },
+                                    "departure_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "18:00:00"
+                                    },
+                                    "vehicle_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "fare_per_seat": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 500
                                     }
                                 },
                                 "type": "object"
@@ -2079,6 +2204,137 @@
                 ]
             }
         },
+        "/routes/search": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Search for available bus routes",
+                "operationId": "bd1c41ef02038c34f54d1e8ecbb18155",
+                "parameters": [
+                    {
+                        "name": "origin",
+                        "in": "query",
+                        "description": "Origin station",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "destination",
+                        "in": "query",
+                        "description": "Destination station",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "journey_date",
+                        "in": "query",
+                        "description": "Date of journey (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "departure_time",
+                        "in": "query",
+                        "description": "Departure time (HH:MM:SS)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "time"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "operator_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "origin": {
+                                                "type": "string",
+                                                "example": "Dhaka"
+                                            },
+                                            "destination": {
+                                                "type": "string",
+                                                "example": "Chittagong"
+                                            },
+                                            "fare": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 1200
+                                            },
+                                            "fare_per_seat": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 500
+                                            },
+                                            "estimated_travel_time": {
+                                                "type": "string",
+                                                "example": "6 hours"
+                                            },
+                                            "vehicle_number": {
+                                                "type": "string",
+                                                "example": "ABC-123"
+                                            },
+                                            "time_of_day": {
+                                                "type": "string",
+                                                "example": "morning"
+                                            },
+                                            "departure_time": {
+                                                "type": "string",
+                                                "format": "time",
+                                                "example": "06:30:00"
+                                            },
+                                            "available_seats": {
+                                                "type": "integer",
+                                                "example": 30
+                                            },
+                                            "vehicle_model": {
+                                                "type": "string",
+                                                "example": "Scania K360"
+                                            },
+                                            "vehicle_type": {
+                                                "type": "string",
+                                                "example": "AC"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/vehicles": {
             "get": {
                 "tags": [
@@ -2132,7 +2388,18 @@
                                     },
                                     "type": {
                                         "type": "string",
+                                        "enum": [
+                                            "AC",
+                                            "Sleeper",
+                                            "Non-AC",
+                                            "hyundai",
+                                            "scania"
+                                        ],
                                         "example": "AC"
+                                    },
+                                    "capacity": {
+                                        "type": "integer",
+                                        "example": 40
                                     }
                                 },
                                 "type": "object"
@@ -2281,7 +2548,18 @@
                                     },
                                     "type": {
                                         "type": "string",
+                                        "enum": [
+                                            "AC",
+                                            "Sleeper",
+                                            "Non-AC",
+                                            "hyundai",
+                                            "scania"
+                                        ],
                                         "example": "Sleeper"
+                                    },
+                                    "capacity": {
+                                        "type": "integer",
+                                        "example": 28
                                     }
                                 },
                                 "type": "object"
@@ -2552,6 +2830,18 @@
                                 "format": "int64",
                                 "example": 1
                             },
+                            "nid": {
+                                "type": "string",
+                                "example": "1234567890"
+                            },
+                            "address": {
+                                "type": "string",
+                                "example": "123 Main St, City"
+                            },
+                            "transport_business_license": {
+                                "type": "string",
+                                "example": "TBL-12345"
+                            },
                             "created_at": {
                                 "type": "string",
                                 "format": "date-time",
@@ -2746,6 +3036,23 @@
                                 "type": "string",
                                 "example": "morning"
                             },
+                            "departure_time": {
+                                "type": "string",
+                                "format": "time",
+                                "example": "06:30:00"
+                            },
+                            "vehicle_id": {
+                                "description": "ID of the vehicle assigned to this route",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "fare_per_seat": {
+                                "description": "Fare per seat for this route",
+                                "type": "number",
+                                "format": "float",
+                                "example": 500
+                            },
                             "created_at": {
                                 "type": "string",
                                 "format": "date-time",
@@ -2799,6 +3106,10 @@
                             "type": {
                                 "type": "string",
                                 "example": "AC"
+                            },
+                            "capacity": {
+                                "type": "integer",
+                                "example": 40
                             },
                             "created_at": {
                                 "type": "string",

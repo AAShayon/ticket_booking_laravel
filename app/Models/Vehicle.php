@@ -13,6 +13,7 @@ class Vehicle extends Model
         'operator_id',
         'model_number',
         'type',
+        'capacity',
     ];
 
     public function operator()

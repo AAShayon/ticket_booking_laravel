@@ -15,6 +15,9 @@ class Operator extends Model
         'contact_phone',
         'admin_commission_percentage',
         'user_id',
+        'nid',
+        'address',
+        'transport_business_license',
     ];
 
     public function routes()

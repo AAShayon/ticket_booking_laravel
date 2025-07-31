@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Route;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
 use Illuminate\Validation\Rule;
@@ -25,6 +26,9 @@ use Illuminate\Validation\Rule;
  *     @OA\Property(property="estimated_travel_time", type="string", example="6 hours"),
  *     @OA\Property(property="vehicle_number", type="string", example="ABC-123"),
  *     @OA\Property(property="time_of_day", type="string", example="morning"),
+ *     @OA\Property(property="departure_time", type="string", format="time", example="06:30:00"),
+ *     @OA\Property(property="vehicle_id", type="integer", format="int64", example=1, description="ID of the vehicle assigned to this route"),
+ *     @OA\Property(property="fare_per_seat", type="number", format="float", example=500.00, description="Fare per seat for this route"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  * )
@@ -72,6 +76,24 @@ class RouteController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/routes/public",
+     *     tags={"Routes"},
+     *     summary="Get all bus routes (Publicly accessible)",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/BusRouteList")
+     *     )
+     * )
+     */
+    public function publicIndex()
+    {
+        $routes = Route::all();
+        return response()->json($routes);
+    }
+
+    /**
      * @OA\Post(
      *     path="/routes",
      *     tags={"Routes"},
@@ -80,14 +102,17 @@ class RouteController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"operator_id","origin","destination","fare","vehicle_number","time_of_day"},
+     *             required={"operator_id","vehicle_id","origin","destination","fare","fare_per_seat","estimated_travel_time","vehicle_number","time_of_day","departure_time"},
      *             @OA\Property(property="operator_id", type="integer", example=1),
+     *             @OA\Property(property="vehicle_id", type="integer", example=1),
      *             @OA\Property(property="origin", type="string", example="Dhaka"),
      *             @OA\Property(property="destination", type="string", example="Chittagong"),
      *             @OA\Property(property="fare", type="number", format="float", example=1200.00),
+     *             @OA\Property(property="fare_per_seat", type="number", format="float", example=500.00),
      *             @OA\Property(property="estimated_travel_time", type="string", example="6 hours"),
      *             @OA\Property(property="vehicle_number", type="string", example="ABC-123"),
      *             @OA\Property(property="time_of_day", type="string", example="morning"),
+     *             @OA\Property(property="departure_time", type="string", format="time", example="06:30:00"),
      *         )
      *     ),
      *     @OA\Response(
@@ -114,11 +139,13 @@ class RouteController extends Controller
     {
         $request->validate([
             'operator_id' => 'required|exists:operators,id',
+            'vehicle_id' => 'required|exists:vehicles,id',
             'origin' => [
                 'required',
                 'string',
                 Rule::unique('routes')->where(function ($query) use ($request) {
                     return $query->where('operator_id', $request->operator_id)
+                                 ->where('vehicle_id', $request->vehicle_id)
                                  ->where('destination', $request->destination)
                                  ->where('estimated_travel_time', $request->estimated_travel_time)
                                  ->where('vehicle_number', $request->vehicle_number)
@@ -126,13 +153,17 @@ class RouteController extends Controller
                 }),
             ],
             'destination' => 'required|string',
-            'fare' => 'required|numeric|min:0',
+            'fare_per_seat' => 'required|numeric|min:0',
             'estimated_travel_time' => 'nullable|string',
             'vehicle_number' => 'required|string|max:255',
             'time_of_day' => 'required|string|in:morning,day,evening,night,am,pm',
+            'departure_time' => 'required|date_format:H:i:s',
         ]);
 
-        $route = Route::create($request->all());
+        $vehicle = \App\Models\Vehicle::find($request->vehicle_id);
+        $calculatedFare = $request->fare_per_seat * $vehicle->capacity;
+
+        $route = Route::create(array_merge($request->all(), ['fare' => $calculatedFare]));
 
         return response()->json($route, 201);
     }
@@ -194,6 +225,9 @@ class RouteController extends Controller
      *             @OA\Property(property="fare", type="number", format="float", example=1500.00),
      *             @OA\Property(property="vehicle_number", type="string", example="XYZ-789"),
      *             @OA\Property(property="time_of_day", type="string", example="evening"),
+     *             @OA\Property(property="departure_time", type="string", format="time", example="18:00:00"),
+     *             @OA\Property(property="vehicle_id", type="integer", example=1),
+     *             @OA\Property(property="fare_per_seat", type="number", format="float", example=500.00),
      *         )
      *     ),
      *     @OA\Response(
@@ -224,15 +258,24 @@ class RouteController extends Controller
     {
         $request->validate([
             'operator_id' => 'sometimes|required|exists:operators,id',
+            'vehicle_id' => 'sometimes|required|exists:vehicles,id',
             'origin' => 'sometimes|required|string',
             'destination' => 'sometimes|required|string',
-            'fare' => 'sometimes|required|numeric|min:0',
+            'fare_per_seat' => 'sometimes|required|numeric|min:0',
             'estimated_travel_time' => 'nullable|string',
             'vehicle_number' => 'sometimes|required|string|max:255',
             'time_of_day' => 'sometimes|required|string|in:morning,day,evening,night,am,pm',
+            'departure_time' => 'sometimes|required|date_format:H:i:s',
         ]);
 
-        $route->update($request->all());
+        $data = $request->all();
+
+        if ($request->has('fare_per_seat') && $request->has('vehicle_id')) {
+            $vehicle = \App\Models\Vehicle::find($request->vehicle_id);
+            $data['fare'] = $request->fare_per_seat * $vehicle->capacity;
+        }
+
+        $route->update($data);
 
         return response()->json($route);
     }
@@ -272,5 +315,115 @@ class RouteController extends Controller
     {
         $route->delete();
         return response()->json(null, 204);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/routes/search",
+     *     tags={"Routes"},
+     *     summary="Search for available bus routes",
+     *     @OA\Parameter(
+     *         name="origin",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="string"),
+     *         description="Origin station"
+     *     ),
+     *     @OA\Parameter(
+     *         name="destination",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="string"),
+     *         description="Destination station"
+     *     ),
+     *     @OA\Parameter(
+     *         name="journey_date",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="string", format="date"),
+     *         description="Date of journey (YYYY-MM-DD)"
+     *     ),
+     *     @OA\Parameter(
+     *         name="departure_time",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string", format="time"),
+     *         description="Departure time (HH:MM:SS)"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="operator_id", type="integer", example=1),
+     *                 @OA\Property(property="origin", type="string", example="Dhaka"),
+     *                 @OA\Property(property="destination", type="string", example="Chittagong"),
+     *                 @OA\Property(property="fare", type="number", format="float", example=1200.00),
+     *                 @OA\Property(property="fare_per_seat", type="number", format="float", example=500.00),
+     *                 @OA\Property(property="estimated_travel_time", type="string", example="6 hours"),
+     *                 @OA\Property(property="vehicle_number", type="string", example="ABC-123"),
+     *                 @OA\Property(property="time_of_day", type="string", example="morning"),
+     *                 @OA\Property(property="departure_time", type="string", format="time", example="06:30:00"),
+     *                 @OA\Property(property="available_seats", type="integer", example=30),
+     *                 @OA\Property(property="vehicle_model", type="string", example="Scania K360"),
+     *                 @OA\Property(property="vehicle_type", type="string", example="AC"),
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     )
+     * )
+     */
+    public function search(Request $request)
+    {
+        $request->validate([
+            'origin' => 'required|string',
+            'destination' => 'required|string',
+            'journey_date' => 'required|date_format:Y-m-d',
+            'departure_time' => 'nullable|date_format:H:i:s',
+        ]);
+
+        $routes = Route::with('vehicle')
+            ->where('origin', $request->origin)
+            ->where('destination', $request->destination);
+
+        if ($request->has('departure_time')) {
+            $routes->where('departure_time', $request->departure_time);
+        }
+
+        $routes = $routes->get();
+
+        $results = [];
+        foreach ($routes as $route) {
+            $bookedSeats = Booking::where('route_id', $route->id)
+                ->where('journey_date', $request->journey_date)
+                ->sum('number_of_seats');
+
+            $availableSeats = $route->vehicle->capacity - $bookedSeats;
+
+            if ($availableSeats > 0) {
+                $results[] = [
+                    'id' => $route->id,
+                    'operator_id' => $route->operator_id,
+                    'origin' => $route->origin,
+                    'destination' => $route->destination,
+                    'fare' => $route->fare,
+                    'fare_per_seat' => $route->fare_per_seat,
+                    'estimated_travel_time' => $route->estimated_travel_time,
+                    'vehicle_number' => $route->vehicle_number,
+                    'time_of_day' => $route->time_of_day,
+                    'available_seats' => $availableSeats,
+                    'vehicle_model' => $route->vehicle->model_number,
+                    'vehicle_type' => $route->vehicle->type,
+                ];
+            }
+        }
+
+        return response()->json($results);
     }
 }

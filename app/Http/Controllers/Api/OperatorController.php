@@ -23,6 +23,9 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="contact_phone", type="string", example="+8801XXXXXXXXX"),
  *     @OA\Property(property="admin_commission_percentage", type="number", format="float", example=10.00),
  *     @OA\Property(property="user_id", type="integer", format="int64", example=1, description="ID of the user who owns/manages this operator"),
+ *     @OA\Property(property="nid", type="string", example="1234567890"),
+ *     @OA\Property(property="address", type="string", example="123 Main St, City"),
+ *     @OA\Property(property="transport_business_license", type="string", example="TBL-12345"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  * )
@@ -70,6 +73,24 @@ class OperatorController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/operators/public",
+     *     tags={"Operators"},
+     *     summary="Get all bus operators (Publicly accessible)",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/OperatorList")
+     *     )
+     * )
+     */
+    public function publicIndex()
+    {
+        $operators = Operator::all();
+        return response()->json($operators);
+    }
+
+    /**
      * @OA\Post(
      *     path="/operators",
      *     tags={"Operators"},
@@ -83,6 +104,18 @@ class OperatorController extends Controller
      *             @OA\Property(property="contact_email", type="string", format="email", example="contact@greenline.com"),
      *             @OA\Property(property="contact_phone", type="string", example="+8801XXXXXXXXX"),
      *             @OA\Property(property="admin_commission_percentage", type="number", format="float", example=10.00),
+     *             @OA\Property(property="nid", type="string", example="1234567890"),
+     *             @OA\Property(property="address", type="string", example="123 Main St, City"),
+     *             @OA\Property(property="transport_business_license", type="string", example="TBL-12345"),
+     *             @OA\Property(
+     *                 property="vehicles",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="model_number", type="string", example="SR112233"),
+     *                     @OA\Property(property="type", type="string", enum={"AC", "non-AC", "sleeper", "hyundai", "scania"}, example="AC"),
+     *                     @OA\Property(property="capacity", type="integer", example=40)
+     *                 )
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -113,6 +146,13 @@ class OperatorController extends Controller
             'contact_phone' => 'nullable|string',
             'admin_commission_percentage' => 'nullable|numeric|min:0|max:100',
             'user_id' => 'nullable|exists:users,id',
+            'nid' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'transport_business_license' => 'nullable|string|max:255',
+            'vehicles' => 'required|array|min:1',
+            'vehicles.*.model_number' => 'required|string|max:255',
+            'vehicles.*.type' => 'required|string|in:AC,non-AC,sleeper,hyundai,scania',
+            'vehicles.*.capacity' => 'required|integer|min:1',
         ]);
 
         $data = $request->all();
@@ -122,7 +162,11 @@ class OperatorController extends Controller
 
         $operator = Operator::create($data);
 
-        return response()->json($operator, 201);
+        foreach ($data['vehicles'] as $vehicleData) {
+            $operator->vehicles()->create($vehicleData);
+        }
+
+        return response()->json($operator->load('vehicles'), 201);
     }
 
     /**
@@ -181,6 +225,9 @@ class OperatorController extends Controller
      *             @OA\Property(property="name", type="string", example="Green Line Paribahan Updated"),
      *             @OA\Property(property="admin_commission_percentage", type="number", format="float", example=12.50),
      *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="nid", type="string", example="1234567890"),
+     *             @OA\Property(property="address", type="string", example="123 Main St, City"),
+     *             @OA\Property(property="transport_business_license", type="string", example="TBL-12345"),
      *         )
      *     ),
      *     @OA\Response(
@@ -215,6 +262,9 @@ class OperatorController extends Controller
             'contact_phone' => 'nullable|string',
             'admin_commission_percentage' => 'nullable|numeric|min:0|max:100',
             'user_id' => 'nullable|exists:users,id',
+            'nid' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'transport_business_license' => 'nullable|string|max:255',
         ]);
 
         $operator->update($request->all());
