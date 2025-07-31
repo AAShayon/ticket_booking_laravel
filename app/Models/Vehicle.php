@@ -5,18 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Route extends Model
+class Vehicle extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'operator_id',
-        'origin',
-        'destination',
-        'fare',
-        'estimated_travel_time',
-        'vehicle_number',
-        'time_of_day',
+        'model_number',
+        'type',
     ];
 
     public function operator()

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\OperatorController;
 use App\Http\Controllers\Api\RouteController;
 use App\Http\Controllers\Api\OperatorRequestController;
+use App\Http\Controllers\Api\VehicleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,11 +42,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/profile', [App\Http\Controllers\Api\ProfileController::class, 'update']);
 
-    // Operator Requests (User can submit)
+    // Operator Requests (User can submit and view their own)
     Route::post('/operator-requests', [OperatorRequestController::class, 'store']);
+    Route::get('/operator-requests/my', [OperatorRequestController::class, 'userRequests']);
+
+    // Operator Routes
+    Route::middleware(['role:operator'])->group(function () {
+        Route::apiResource('/vehicles', VehicleController::class);
+    });
 
     // Admin Routes
     Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin/vehicles', [VehicleController::class, 'adminIndex']);
         Route::get('/admin/users', [AdminController::class, 'getUsers']);
         Route::get('/admin/users/{user}', [AdminController::class, 'showUser']);
         Route::post('/admin/users', [AdminController::class, 'createUser']);

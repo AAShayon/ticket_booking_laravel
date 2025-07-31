@@ -73,7 +73,7 @@ class OperatorRequestController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'operator_name' => 'required|string|max:255',
+            'operator_name' => 'required|string|max:255|unique:operator_requests,operator_name,NULL,id,status,pending',
             'route_details' => 'required|string',
             'fare_details' => 'required|string',
             'admin_commission_percentage' => 'required|numeric|min:0|max:100',
@@ -82,6 +82,29 @@ class OperatorRequestController extends Controller
         $operatorRequest = Auth::user()->operatorRequests()->create($request->all());
 
         return response()->json($operatorRequest, 201);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/operator-requests/my",
+     *     tags={"Operator Requests"},
+     *     summary="Get all operator requests for the authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/OperatorRequestList")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *     )
+     * )
+     */
+    public function userRequests()
+    {
+        $requests = Auth::user()->operatorRequests()->get();
+        return response()->json($requests);
     }
 
     /**

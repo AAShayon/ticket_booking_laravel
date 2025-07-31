@@ -21,6 +21,8 @@ class RouteResource extends JsonResource
             'destination' => $this->destination,
             'fare' => $this->fare,
             'estimated_travel_time' => $this->estimated_travel_time,
+            'vehicle_number' => $this->vehicle_number,
+            'time_of_day' => $this->time_of_day,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'operator' => new OperatorResource($this->whenLoaded('operator')),

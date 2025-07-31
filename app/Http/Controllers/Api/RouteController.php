@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Route;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
+use Illuminate\Validation\Rule;
 
 /**
  * @OA\Tag(
@@ -22,6 +23,8 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="destination", type="string", example="Chittagong"),
  *     @OA\Property(property="fare", type="number", format="float", example=1200.00),
  *     @OA\Property(property="estimated_travel_time", type="string", example="6 hours"),
+ *     @OA\Property(property="vehicle_number", type="string", example="ABC-123"),
+ *     @OA\Property(property="time_of_day", type="string", example="morning"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  * )
@@ -35,11 +38,11 @@ use OpenApi\Annotations as OA;
  */
 class RouteController extends Controller
 {
-    public function __construct()
-    {
-        parent::__construct();
-        $this->middleware('role:admin');
-    }
+    // public function __construct()
+    // {
+    //     parent::__construct();
+    //     $this->middleware('role:admin');
+    // }
 
     /**
      * @OA\Get(
@@ -77,12 +80,14 @@ class RouteController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"operator_id","origin","destination","fare"},
+     *             required={"operator_id","origin","destination","fare","vehicle_number","time_of_day"},
      *             @OA\Property(property="operator_id", type="integer", example=1),
      *             @OA\Property(property="origin", type="string", example="Dhaka"),
      *             @OA\Property(property="destination", type="string", example="Chittagong"),
      *             @OA\Property(property="fare", type="number", format="float", example=1200.00),
      *             @OA\Property(property="estimated_travel_time", type="string", example="6 hours"),
+     *             @OA\Property(property="vehicle_number", type="string", example="ABC-123"),
+     *             @OA\Property(property="time_of_day", type="string", example="morning"),
      *         )
      *     ),
      *     @OA\Response(
@@ -109,10 +114,22 @@ class RouteController extends Controller
     {
         $request->validate([
             'operator_id' => 'required|exists:operators,id',
-            'origin' => 'required|string',
+            'origin' => [
+                'required',
+                'string',
+                Rule::unique('routes')->where(function ($query) use ($request) {
+                    return $query->where('operator_id', $request->operator_id)
+                                 ->where('destination', $request->destination)
+                                 ->where('estimated_travel_time', $request->estimated_travel_time)
+                                 ->where('vehicle_number', $request->vehicle_number)
+                                 ->where('time_of_day', $request->time_of_day);
+                }),
+            ],
             'destination' => 'required|string',
             'fare' => 'required|numeric|min:0',
             'estimated_travel_time' => 'nullable|string',
+            'vehicle_number' => 'required|string|max:255',
+            'time_of_day' => 'required|string|in:morning,day,evening,night,am,pm',
         ]);
 
         $route = Route::create($request->all());
@@ -175,6 +192,8 @@ class RouteController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="origin", type="string", example="Sylhet"),
      *             @OA\Property(property="fare", type="number", format="float", example=1500.00),
+     *             @OA\Property(property="vehicle_number", type="string", example="XYZ-789"),
+     *             @OA\Property(property="time_of_day", type="string", example="evening"),
      *         )
      *     ),
      *     @OA\Response(
@@ -209,6 +228,8 @@ class RouteController extends Controller
             'destination' => 'sometimes|required|string',
             'fare' => 'sometimes|required|numeric|min:0',
             'estimated_travel_time' => 'nullable|string',
+            'vehicle_number' => 'sometimes|required|string|max:255',
+            'time_of_day' => 'sometimes|required|string|in:morning,day,evening,night,am,pm',
         ]);
 
         $route->update($request->all());

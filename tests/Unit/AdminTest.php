@@ -18,6 +18,7 @@ class AdminTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        User::query()->delete(); // Clear all users to ensure a clean state for this test suite
         $this->adminUser = User::factory()->create(['role' => 'admin']);
         $this->regularUser = User::factory()->create(['role' => 'user']);
     }

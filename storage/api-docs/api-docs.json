@@ -1233,6 +1233,35 @@
                 ]
             }
         },
+        "/operator-requests/my": {
+            "get": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Get all operator requests for the authenticated user",
+                "operationId": "ef54b7b5acc2e7a0b82aa2e3f5a79ddb",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequestList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/admin/operator-requests": {
             "get": {
                 "tags": [
@@ -1809,7 +1838,9 @@
                                     "operator_id",
                                     "origin",
                                     "destination",
-                                    "fare"
+                                    "fare",
+                                    "vehicle_number",
+                                    "time_of_day"
                                 ],
                                 "properties": {
                                     "operator_id": {
@@ -1832,6 +1863,14 @@
                                     "estimated_travel_time": {
                                         "type": "string",
                                         "example": "6 hours"
+                                    },
+                                    "vehicle_number": {
+                                        "type": "string",
+                                        "example": "ABC-123"
+                                    },
+                                    "time_of_day": {
+                                        "type": "string",
+                                        "example": "morning"
                                     }
                                 },
                                 "type": "object"
@@ -1950,6 +1989,14 @@
                                         "type": "number",
                                         "format": "float",
                                         "example": 1500
+                                    },
+                                    "vehicle_number": {
+                                        "type": "string",
+                                        "example": "XYZ-789"
+                                    },
+                                    "time_of_day": {
+                                        "type": "string",
+                                        "example": "evening"
                                     }
                                 },
                                 "type": "object"
@@ -2023,6 +2070,291 @@
                     },
                     "404": {
                         "description": "Route not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/vehicles": {
+            "get": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Get all vehicles for the authenticated operator",
+                "operationId": "f627fb85543e356532922246d50e6e2a",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VehicleList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Create a new vehicle for the authenticated operator",
+                "operationId": "3b250a933fc5648aedd688fdcf4eae81",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "model_number",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "model_number": {
+                                        "type": "string",
+                                        "example": "Scania K360"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "AC"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Vehicle created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vehicle"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/vehicles": {
+            "get": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Get all vehicles (Admin only)",
+                "operationId": "4d0d6a894efb3ecece585cc9be6deba6",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VehicleList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/vehicles/{id}": {
+            "get": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Get a specific vehicle by ID for the authenticated operator",
+                "operationId": "00b76a563ae78ef08e92480a3cd58a9e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the vehicle to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vehicle"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Vehicle not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Update a specific vehicle by ID for the authenticated operator",
+                "operationId": "322797dc21f323e627fc60773b7130c6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the vehicle to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "model_number": {
+                                        "type": "string",
+                                        "example": "Volvo 9700"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "Sleeper"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Vehicle updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vehicle"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Vehicle not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Delete a specific vehicle by ID for the authenticated operator",
+                "operationId": "7fbf332babe156123bfa2b84d32bb68a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the vehicle to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Vehicle deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Vehicle not found"
                     }
                 },
                 "security": [
@@ -2406,6 +2738,14 @@
                                 "type": "string",
                                 "example": "6 hours"
                             },
+                            "vehicle_number": {
+                                "type": "string",
+                                "example": "ABC-123"
+                            },
+                            "time_of_day": {
+                                "type": "string",
+                                "example": "morning"
+                            },
                             "created_at": {
                                 "type": "string",
                                 "format": "date-time",
@@ -2426,6 +2766,60 @@
                 "type": "array",
                 "items": {
                     "$ref": "#/components/schemas/BusRoute"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
+            "Vehicle": {
+                "title": "Vehicle",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "operator_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "model_number": {
+                                "type": "string",
+                                "example": "Scania K360"
+                            },
+                            "type": {
+                                "type": "string",
+                                "example": "AC"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "VehicleList": {
+                "title": "Vehicle List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/Vehicle"
                 },
                 "allOf": [
                     {
@@ -2495,6 +2889,10 @@
         {
             "name": "Routes",
             "description": "API Endpoints for Bus Route Management (Admin Only)"
+        },
+        {
+            "name": "Vehicles",
+            "description": "API Endpoints for Vehicle Management (Operator Only)"
         }
     ]
 }
