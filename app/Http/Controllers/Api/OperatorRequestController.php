@@ -223,8 +223,7 @@ class OperatorRequestController extends Controller
 
         $operator = Operator::create([
             'name' => $operatorRequest->operator_name,
-            'contact_email' => null, // Assuming these are not provided in the request
-            'contact_phone' => null,
+            
             'admin_commission_percentage' => $operatorRequest->admin_commission_percentage,
             'user_id' => $operatorRequest->user_id,
         ]);

@@ -140,18 +140,7 @@ class RouteController extends Controller
         $request->validate([
             'operator_id' => 'required|exists:operators,id',
             'vehicle_id' => 'required|exists:vehicles,id',
-            'origin' => [
-                'required',
-                'string',
-                Rule::unique('routes')->where(function ($query) use ($request) {
-                    return $query->where('operator_id', $request->operator_id)
-                                 ->where('vehicle_id', $request->vehicle_id)
-                                 ->where('destination', $request->destination)
-                                 ->where('estimated_travel_time', $request->estimated_travel_time)
-                                 ->where('vehicle_number', $request->vehicle_number)
-                                 ->where('time_of_day', $request->time_of_day);
-                }),
-            ],
+            'origin' => 'required|string',
             'destination' => 'required|string',
             'fare_per_seat' => 'required|numeric|min:0',
             'estimated_travel_time' => 'nullable|string',
@@ -390,24 +379,16 @@ class RouteController extends Controller
 
         $routes = Route::with('vehicle')
             ->where('origin', $request->origin)
-            ->where('destination', $request->destination);
+            ->where('destination', $request->destination)
+            ->withCount(['bookings as booked_seats' => function ($query) use ($request) {
+                $query->where('journey_date', $request->journey_date);
+            }])
+            ->get();
 
-        if ($request->has('departure_time')) {
-            $routes->where('departure_time', $request->departure_time);
-        }
-
-        $routes = $routes->get();
-
-        $results = [];
-        foreach ($routes as $route) {
-            $bookedSeats = Booking::where('route_id', $route->id)
-                ->where('journey_date', $request->journey_date)
-                ->sum('number_of_seats');
-
-            $availableSeats = $route->vehicle->capacity - $bookedSeats;
-
+        $results = $routes->map(function ($route) {
+            $availableSeats = $route->vehicle->capacity - $route->booked_seats;
             if ($availableSeats > 0) {
-                $results[] = [
+                return [
                     'id' => $route->id,
                     'operator_id' => $route->operator_id,
                     'origin' => $route->origin,
@@ -422,7 +403,8 @@ class RouteController extends Controller
                     'vehicle_type' => $route->vehicle->type,
                 ];
             }
-        }
+            return null;
+        })->filter();
 
         return response()->json($results);
     }

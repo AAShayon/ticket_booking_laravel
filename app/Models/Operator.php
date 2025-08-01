@@ -18,6 +18,7 @@ class Operator extends Model
         'nid',
         'address',
         'transport_business_license',
+        'logo',
     ];
 
     public function routes()

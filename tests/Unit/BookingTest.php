@@ -42,6 +42,10 @@ class BookingTest extends TestCase
         $this->assertDatabaseHas('bookings', [
             'user_id' => $this->user->id,
             'from_station' => 'Station A',
+            'to_station' => 'Station B',
+            'journey_date' => '2025-12-25',
+            'seat_type' => 'Economy',
+            'number_of_seats' => 2,
             'total_fare' => 100.00,
         ]);
     }
@@ -89,7 +93,7 @@ class BookingTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['seat_type' => 'Business', 'total_fare' => '200.00']);
+                 ->assertJsonFragment(['seat_type' => 'Business', 'total_fare' => 200.00]);
 
         $this->assertDatabaseHas('bookings', [
             'id' => $booking->id,

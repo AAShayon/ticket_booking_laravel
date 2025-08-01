@@ -49,7 +49,7 @@ class AdminTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                 ->assertJson(['email' => 'newuser@example.com', 'role' => 'user']);
+                 ->assertJson(['name' => 'New User', 'email' => 'newuser@example.com', 'role' => 'user']);
 
         $this->assertDatabaseHas('users', ['email' => 'newuser@example.com']);
     }
@@ -64,7 +64,7 @@ class AdminTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['name' => 'Updated Name', 'role' => 'admin']);
+                 ->assertJsonFragment(['name' => 'Updated Name', 'role' => 'admin']);
 
         $this->assertDatabaseHas('users', [
             'id' => $userToUpdate->id,

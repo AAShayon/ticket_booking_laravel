@@ -14,6 +14,7 @@ class Vehicle extends Model
         'model_number',
         'type',
         'capacity',
+        'image',
     ];
 
     public function operator()

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use OpenApi\Annotations as OA;
 
 /**
@@ -22,6 +23,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="model_number", type="string", example="Scania K360"),
  *     @OA\Property(property="type", type="string", example="AC"),
  *     @OA\Property(property="capacity", type="integer", example=40),
+ *     @OA\Property(property="image", type="string", nullable=true, example="uploads/vehicles/bus.png"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  * )
@@ -113,6 +115,7 @@ class VehicleController extends Controller
      *             @OA\Property(property="model_number", type="string", example="Scania K360"),
      *             @OA\Property(property="type", type="string", enum={"AC", "Sleeper", "Non-AC", "hyundai", "scania"}, example="AC"),
      *             @OA\Property(property="capacity", type="integer", example=40),
+     *             @OA\Property(property="image", type="string", format="binary", description="Vehicle image file"),
      *         )
      *     ),
      *     @OA\Response(
@@ -146,9 +149,15 @@ class VehicleController extends Controller
             'model_number' => 'required|string|max:255',
             'type' => 'required|string|in:AC,Sleeper,Non-AC,hyundai,scania',
             'capacity' => 'required|integer|min:1',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $vehicle = $operator->vehicles()->create($request->all());
+        $data = $request->all();
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('vehicles', 'public');
+        }
+
+        $vehicle = $operator->vehicles()->create($data);
 
         return response()->json($vehicle, 201);
     }
@@ -213,6 +222,7 @@ class VehicleController extends Controller
      *             @OA\Property(property="model_number", type="string", example="Volvo 9700"),
      *             @OA\Property(property="type", type="string", enum={"AC", "Sleeper", "Non-AC", "hyundai", "scania"}, example="Sleeper"),
      *             @OA\Property(property="capacity", type="integer", example=28),
+     *             @OA\Property(property="image", type="string", format="binary", description="Vehicle image file"),
      *         )
      *     ),
      *     @OA\Response(
@@ -250,9 +260,18 @@ class VehicleController extends Controller
             'model_number' => 'sometimes|required|string|max:255',
             'type' => 'sometimes|required|string|in:AC,Sleeper,Non-AC,hyundai,scania',
             'capacity' => 'sometimes|required|integer|min:1',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $vehicle->update($request->all());
+        $data = $request->all();
+        if ($request->hasFile('image')) {
+            if ($vehicle->image) {
+                Storage::disk('public')->delete($vehicle->image);
+            }
+            $data['image'] = $request->file('image')->store('vehicles', 'public');
+        }
+
+        $vehicle->update($data);
 
         return response()->json($vehicle);
     }
@@ -295,6 +314,9 @@ class VehicleController extends Controller
             return response()->json(['message' => 'Unauthorized to delete this vehicle.'], 403);
         }
 
+        if ($vehicle->image) {
+            Storage::disk('public')->delete($vehicle->image);
+        }
         $vehicle->delete();
         return response()->json(null, 204);
     }

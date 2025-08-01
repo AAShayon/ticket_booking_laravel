@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Pnr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use OpenApi\Annotations as OA;
 
 /**
@@ -123,25 +124,29 @@ class PaymentController extends Controller
      *     )
      * )
      */
-    public function paymentSuccess(Request $request)
+    private function handleSuccessfulPayment(Payment $payment)
     {
-        // Handle successful payment callback from SSLCommerz
-        // Verify transaction and update payment status
-        $transactionId = $request->input('tran_id');
-        $payment = Payment::where('transaction_id', $transactionId)->first();
-
-        if ($payment) {
+        DB::transaction(function () use ($payment) {
             $payment->status = 'completed';
             $payment->save();
             $payment->booking->status = 'confirmed';
             $payment->booking->save();
 
-            $pnr = \App\Models\Pnr::create([
+            Pnr::create([
                 'booking_id' => $payment->booking->id,
                 'pnr_number' => generatePnr(),
             ]);
+        });
+    }
 
-            return response()->json(['message' => 'Payment successful', 'payment' => $payment, 'pnr' => $pnr]);
+    public function paymentSuccess(Request $request)
+    {
+        $transactionId = $request->input('tran_id');
+        $payment = Payment::where('transaction_id', $transactionId)->first();
+
+        if ($payment) {
+            $this->handleSuccessfulPayment($payment);
+            return response()->json(['message' => 'Payment successful', 'payment' => $payment]);
         }
 
         return response()->json(['message' => 'Payment not found'], 404);
@@ -250,25 +255,12 @@ class PaymentController extends Controller
      */
     public function ipn(Request $request)
     {
-        // Handle IPN (Instant Payment Notification) from SSLCommerz
-        // This is typically a server-to-server communication
         $transactionId = $request->input('tran_id');
         $payment = Payment::where('transaction_id', $transactionId)->first();
 
         if ($payment) {
-            // Verify IPN data and update payment status accordingly
-            // For simplicity, assuming IPN always means success here
-            $payment->status = 'completed';
-            $payment->save();
-            $payment->booking->status = 'confirmed';
-            $payment->booking->save();
-
-            $pnr = \App\Models\Pnr::create([
-                'booking_id' => $payment->booking->id,
-                'pnr_number' => generatePnr(),
-            ]);
-
-            return response()->json(['message' => 'IPN received and processed', 'pnr' => $pnr]);
+            $this->handleSuccessfulPayment($payment);
+            return response()->json(['message' => 'IPN received and processed']);
         }
 
         return response()->json(['message' => 'Payment not found'], 404);

@@ -13,7 +13,13 @@ use OpenApi\Annotations as OA;
  * @OA\Info(
  *      version="1.0.0",
  *      title="Ticket Booking System API Documentation",
- *      description="API documentation for the Ticket Booking System backend.",
+ *      description="API documentation for the Ticket Booking System backend.
+
+**Test Credentials:**
+- **Admin:** `superadmin@example.com` / `password`
+- **Operator Owner 1:** `operator1@example.com` / `password`
+- **Operator Owner 2:** `operator2@example.com` / `password`
+- **Regular User:** `user@example.com` / `password`",
  *      @OA\Contact(
  *          email="support@example.com"
  *      ),

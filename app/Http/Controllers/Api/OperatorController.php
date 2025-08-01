@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Operator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use OpenApi\Annotations as OA;
 
 /**
@@ -26,6 +27,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="nid", type="string", example="1234567890"),
  *     @OA\Property(property="address", type="string", example="123 Main St, City"),
  *     @OA\Property(property="transport_business_license", type="string", example="TBL-12345"),
+ *     @OA\Property(property="logo", type="string", nullable=true, example="uploads/logos/greenline.png"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  * )
@@ -107,6 +109,7 @@ class OperatorController extends Controller
      *             @OA\Property(property="nid", type="string", example="1234567890"),
      *             @OA\Property(property="address", type="string", example="123 Main St, City"),
      *             @OA\Property(property="transport_business_license", type="string", example="TBL-12345"),
+     *             @OA\Property(property="logo", type="string", format="binary", description="Operator logo image"),
      *             @OA\Property(
      *                 property="vehicles",
      *                 type="array",
@@ -149,6 +152,7 @@ class OperatorController extends Controller
             'nid' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
             'transport_business_license' => 'nullable|string|max:255',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'vehicles' => 'required|array|min:1',
             'vehicles.*.model_number' => 'required|string|max:255',
             'vehicles.*.type' => 'required|string|in:AC,non-AC,sleeper,hyundai,scania',
@@ -156,6 +160,9 @@ class OperatorController extends Controller
         ]);
 
         $data = $request->all();
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $request->file('logo')->store('logos', 'public');
+        }
         if (!isset($data['user_id'])) {
             $data['user_id'] = Auth::id();
         }
@@ -228,6 +235,7 @@ class OperatorController extends Controller
      *             @OA\Property(property="nid", type="string", example="1234567890"),
      *             @OA\Property(property="address", type="string", example="123 Main St, City"),
      *             @OA\Property(property="transport_business_license", type="string", example="TBL-12345"),
+     *             @OA\Property(property="logo", type="string", format="binary", description="Operator logo image"),
      *         )
      *     ),
      *     @OA\Response(
@@ -265,9 +273,18 @@ class OperatorController extends Controller
             'nid' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
             'transport_business_license' => 'nullable|string|max:255',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $operator->update($request->all());
+        $data = $request->all();
+        if ($request->hasFile('logo')) {
+            if ($operator->logo) {
+                Storage::disk('public')->delete($operator->logo);
+            }
+            $data['logo'] = $request->file('logo')->store('logos', 'public');
+        }
+
+        $operator->update($data);
 
         return response()->json($operator);
     }

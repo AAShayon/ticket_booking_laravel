@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Ticket Booking System API Documentation",
-        "description": "API documentation for the Ticket Booking System backend.",
+        "description": "API documentation for the Ticket Booking System backend.\n\n**Test Credentials:**\n- **Admin:** `superadmin@example.com` / `password`\n- **Operator Owner 1:** `operator1@example.com` / `password`\n- **Operator Owner 2:** `operator2@example.com` / `password`\n- **Regular User:** `user@example.com` / `password`",
         "contact": {
             "email": "support@example.com"
         },
@@ -14,7 +14,7 @@
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8001/api/staged",
+            "url": "http://127.0.0.1:8001/api",
             "description": "Ticket Booking System API Server"
         }
     ],
@@ -968,6 +968,11 @@
                                         "type": "string",
                                         "example": "TBL-12345"
                                     },
+                                    "logo": {
+                                        "description": "Operator logo image",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
                                     "vehicles": {
                                         "type": "array",
                                         "items": {
@@ -1149,6 +1154,11 @@
                                     "transport_business_license": {
                                         "type": "string",
                                         "example": "TBL-12345"
+                                    },
+                                    "logo": {
+                                        "description": "Operator logo image",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -1608,7 +1618,7 @@
                     "Payments"
                 ],
                 "summary": "Callback URL for successful payments",
-                "operationId": "2133cc54a180a1df31fab3b426ead038",
+                "operationId": "957daca4c48399650b873aa23bdf3c25",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2400,6 +2410,11 @@
                                     "capacity": {
                                         "type": "integer",
                                         "example": 40
+                                    },
+                                    "image": {
+                                        "description": "Vehicle image file",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -2560,6 +2575,11 @@
                                     "capacity": {
                                         "type": "integer",
                                         "example": 28
+                                    },
+                                    "image": {
+                                        "description": "Vehicle image file",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -2842,6 +2862,11 @@
                                 "type": "string",
                                 "example": "TBL-12345"
                             },
+                            "logo": {
+                                "type": "string",
+                                "example": "uploads/logos/greenline.png",
+                                "nullable": true
+                            },
                             "created_at": {
                                 "type": "string",
                                 "format": "date-time",
@@ -3110,6 +3135,11 @@
                             "capacity": {
                                 "type": "integer",
                                 "example": 40
+                            },
+                            "image": {
+                                "type": "string",
+                                "example": "uploads/vehicles/bus.png",
+                                "nullable": true
                             },
                             "created_at": {
                                 "type": "string",
