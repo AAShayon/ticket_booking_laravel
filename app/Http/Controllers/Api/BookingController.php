@@ -105,9 +105,10 @@ class BookingController extends Controller
             'seat_type' => 'required|string',
             'number_of_seats' => 'required|integer|min:1',
             'total_fare' => 'required|numeric|min:0',
+            'route_id' => 'required|exists:routes,id',
         ]);
 
-        $booking = Auth::user()->bookings()->create(array_merge($request->all(), ['status' => 'pending']));
+        $booking = Auth::user()->bookings()->create(array_merge($request->all(), ['status' => 'pending', 'route_id' => $request->route_id]));
 
         return response()->json($booking, 201);
     }

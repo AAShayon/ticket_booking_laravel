@@ -207,7 +207,7 @@ class AdminController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'sometimes|required|string|min:8',
-            'role' => 'sometimes|required|string|in:user,admin',
+            'role' => 'sometimes|required|string|in:user,admin,operator',
         ]);
 
         if ($request->has('password')) {

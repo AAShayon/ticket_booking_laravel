@@ -18,6 +18,7 @@ class Booking extends Model
         'number_of_seats',
         'total_fare',
         'status',
+        'route_id',
     ];
 
     public function user()

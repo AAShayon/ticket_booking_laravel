@@ -31,4 +31,9 @@ class Route extends Model
     {
         return $this->belongsTo(Vehicle::class);
     }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 }
