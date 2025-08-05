@@ -892,6 +892,248 @@
                 ]
             }
         },
+        "/forgot-password/request-otp": {
+            "post": {
+                "tags": [
+                    "Forgot Password"
+                ],
+                "summary": "Request OTP for password reset",
+                "operationId": "8ac11c2ad5a1169198399c32536a79b5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "type": "string",
+                                        "example": "user@example.com or +8801XXXXXXXXX"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP sent to your identifier."
+                                        },
+                                        "otp": {
+                                            "description": "For testing purposes only. In production, this would be sent via email/SMS.",
+                                            "type": "string",
+                                            "example": "123456"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found with this identifier."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/forgot-password/verify-otp": {
+            "post": {
+                "tags": [
+                    "Forgot Password"
+                ],
+                "summary": "Verify OTP and get password reset token",
+                "operationId": "6f712919b4697a972ef9eca413853086",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "type": "string",
+                                        "example": "user@example.com or +8801XXXXXXXXX"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP verified. You can now reset your password."
+                                        },
+                                        "reset_token": {
+                                            "type": "string",
+                                            "example": "some_long_random_string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid or expired OTP."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/forgot-password/reset": {
+            "post": {
+                "tags": [
+                    "Forgot Password"
+                ],
+                "summary": "Reset user password",
+                "operationId": "eaa015a7e30624ca6c61fd426ed2ab74",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reset_token",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "reset_token": {
+                                        "type": "string",
+                                        "example": "some_long_random_string"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "new_secure_password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "new_secure_password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password has been reset successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired reset token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid or expired reset token."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/operators": {
             "get": {
                 "tags": [
@@ -1812,6 +2054,11 @@
                                         "format": "email",
                                         "example": "jane.doe@example.com"
                                     },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+8801XXXXXXXXX",
+                                        "nullable": true
+                                    },
                                     "password": {
                                         "type": "string",
                                         "format": "password",
@@ -1826,6 +2073,17 @@
                                         "description": "Profile image file",
                                         "type": "string",
                                         "format": "binary"
+                                    },
+                                    "last_login_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-01-01T00:00:00.000000Z",
+                                        "nullable": true
+                                    },
+                                    "total_bookings": {
+                                        "type": "integer",
+                                        "readOnly": true,
+                                        "example": 5
                                     }
                                 },
                                 "type": "object"
@@ -2688,6 +2946,11 @@
                                 "format": "email",
                                 "example": "admin@example.com"
                             },
+                            "phone_number": {
+                                "type": "string",
+                                "example": "+8801XXXXXXXXX",
+                                "nullable": true
+                            },
                             "profile_image": {
                                 "type": "string",
                                 "example": "uploads/profile.jpg",
@@ -2696,6 +2959,12 @@
                             "role": {
                                 "type": "string",
                                 "example": "admin"
+                            },
+                            "last_login_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z",
+                                "nullable": true
                             },
                             "created_at": {
                                 "type": "string",
@@ -3210,6 +3479,10 @@
         {
             "name": "Bookings",
             "description": "API Endpoints for Booking Management"
+        },
+        {
+            "name": "Forgot Password",
+            "description": "API Endpoints for Forgot Password functionality"
         },
         {
             "name": "Operators",

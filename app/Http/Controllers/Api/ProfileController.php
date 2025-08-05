@@ -30,9 +30,12 @@ class ProfileController extends Controller
      *             @OA\Schema(
      *                 @OA\Property(property="name", type="string", example="Jane Doe"),
      *                 @OA\Property(property="email", type="string", format="email", example="jane.doe@example.com"),
+     *                 @OA\Property(property="phone_number", type="string", nullable=true, example="+8801XXXXXXXXX"),
      *                 @OA\Property(property="password", type="string", format="password", example="new_password"),
      *                 @OA\Property(property="password_confirmation", type="string", format="password", example="new_password"),
      *                 @OA\Property(property="profile_image", type="string", format="binary", description="Profile image file"),
+     *                 @OA\Property(property="last_login_at", type="string", format="date-time", nullable=true, example="2025-01-01T00:00:00.000000Z"),
+     *                 @OA\Property(property="total_bookings", type="integer", example=5, readOnly=true),
      *             )
      *         )
      *     ),
@@ -64,9 +67,10 @@ class ProfileController extends Controller
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'sometimes|required|string|min:8|confirmed',
             'profile_image' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'phone_number' => 'nullable|string|max:20',
         ]);
 
-        $data = $request->only(['name', 'email']);
+        $data = $request->only(['name', 'email', 'phone_number']);
 
         if ($request->has('password')) {
             $data['password'] = Hash::make($request->password);

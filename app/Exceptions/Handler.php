@@ -76,6 +76,12 @@ class Handler extends ExceptionHandler
                 ], 405);
             }
 
+            if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+                return response()->json([
+                    'message' => 'Unauthenticated.'
+                ], 401);
+            }
+
             return response()->json([
                 'message' => $exception->getMessage(),
             ], 500);

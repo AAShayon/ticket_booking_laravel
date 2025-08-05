@@ -2,6 +2,9 @@
 
 namespace Tests\Unit;
 
+use App\Models\Route;
+use App\Models\Vehicle;
+use App\Models\Operator;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Booking;
@@ -19,11 +22,17 @@ class BookingTest extends TestCase
         parent::setUp();
         $this->user = User::factory()->create();
         $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->operator = User::factory()->create(['role' => 'operator']);
     }
 
     public function test_user_can_create_booking()
     {
+        $operator = Operator::factory()->create(['user_id' => $this->operator->id]);
+        $vehicle = Vehicle::factory()->create(['operator_id' => $operator->id]);
+        $route = Route::factory()->create(['operator_id' => $operator->id, 'vehicle_id' => $vehicle->id]);
+
         $response = $this->actingAs($this->user, 'sanctum')->postJson('/api/bookings', [
+            'route_id' => $route->id,
             'from_station' => 'Station A',
             'to_station' => 'Station B',
             'journey_date' => '2025-12-25',
@@ -41,6 +50,7 @@ class BookingTest extends TestCase
 
         $this->assertDatabaseHas('bookings', [
             'user_id' => $this->user->id,
+            'route_id' => $route->id,
             'from_station' => 'Station A',
             'to_station' => 'Station B',
             'journey_date' => '2025-12-25',

@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'role',
         'profile_image',
+        'phone_number',
     ];
 
     /**
@@ -35,6 +36,8 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    protected $appends = ['total_bookings'];
 
     /**
      * The attributes that should be cast.
@@ -62,5 +65,10 @@ class User extends Authenticatable
     public function operator()
     {
         return $this->hasOne(Operator::class, 'user_id');
+    }
+
+    public function getTotalBookingsAttribute()
+    {
+        return $this->bookings()->count();
     }
 }

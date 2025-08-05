@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\OperatorController;
 use App\Http\Controllers\Api\RouteController;
 use App\Http\Controllers\Api\OperatorRequestController;
 use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\ForgotPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,11 @@ use App\Http\Controllers\Api\VehicleController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Forgot Password Routes
+Route::post('/forgot-password/request-otp', [ForgotPasswordController::class, 'requestOtp']);
+Route::post('/forgot-password/verify-otp', [ForgotPasswordController::class, 'verifyOtp']);
+Route::post('/forgot-password/reset', [ForgotPasswordController::class, 'reset']);
 
 Route::post('/payments/success', [PaymentController::class, 'paymentSuccess']);
 Route::post('/payments/fail', [PaymentController::class, 'paymentFail']);
