@@ -213,13 +213,24 @@ class AdminController extends Controller
             'password' => 'sometimes|required|string|min:8',
             'role' => 'sometimes|required|string|in:user,admin,operator',
             'phone_number' => 'nullable|string|max:20',
+            'profile_image' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
+        $data = $request->only(['name', 'email', 'role', 'phone_number']);
+
         if ($request->has('password')) {
-            $request->merge(['password' => Hash::make($request->password)]);
+            $data['password'] = Hash::make($request->password);
         }
 
-        $user->update($request->all());
+        if ($request->hasFile('profile_image')) {
+            // Delete old image if exists
+            if ($user->profile_image) {
+                Storage::disk('public')->delete($user->profile_image);
+            }
+            $data['profile_image'] = $request->file('profile_image')->store('uploads', 'public');
+        }
+
+        $user->update($data);
 
         return response()->json($user);
     }
