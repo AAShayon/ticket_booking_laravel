@@ -207,19 +207,25 @@ class AdminController extends Controller
      */
     public function updateUser(Request $request, User $user)
     {
-        $request->validate([
+        // The 'sometimes' rule ensures we only validate fields that are actually present.
+        // The `validate` method returns an array of ONLY the data that passed.
+        $validatedData = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'sometimes|required|string|min:8',
+            'password' => 'sometimes|nullable|string|min:8',
             'role' => 'sometimes|required|string|in:user,admin,operator',
-            'phone_number' => 'nullable|string|max:20',
+            'phone_number' => 'sometimes|nullable|string|max:20',
             'profile_image' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $data = $request->only(['name', 'email', 'role', 'phone_number']);
-
-        if ($request->has('password')) {
-            $data['password'] = Hash::make($request->password);
+        // If the validated data includes a password, hash it.
+        if (isset($validatedData['password'])) {
+            // Handle case where password might be an empty string but we don't want to update it
+            if (empty($validatedData['password'])) {
+                unset($validatedData['password']);
+            } else {
+                $validatedData['password'] = Hash::make($validatedData['password']);
+            }
         }
 
         if ($request->hasFile('profile_image')) {
@@ -227,11 +233,15 @@ class AdminController extends Controller
             if ($user->profile_image) {
                 Storage::disk('public')->delete($user->profile_image);
             }
-            $data['profile_image'] = $request->file('profile_image')->store('uploads', 'public');
+            $validatedData['profile_image'] = $request->file('profile_image')->store('uploads', 'public');
         }
 
-        $user->update($data);
+        // This is the most important part. We call update() with the validated data.
+        // If Flutter sends only {'role': 'user'}, then $validatedData will be ['role' => 'user'],
+        // and ONLY the role column will be updated in the database.
+        $user->update($validatedData);
 
+        // Return the full, updated user object to the app.
         return response()->json($user);
     }
 
