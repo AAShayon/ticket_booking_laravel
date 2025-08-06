@@ -214,7 +214,7 @@ class FullApiTest extends TestCase
 
     public function test_admin_can_manage_operator_requests()
     {
-        $operatorRequest = \App\Models\OperatorRequest::factory()->create();
+        $operatorRequest = \App\Models\OperatorRequest::factory()->create(['status' => 'pending']);
 
         // View all operator requests
         $response = $this->actingAs($this->adminUser, 'sanctum')->getJson('/api/admin/operator-requests');
@@ -225,8 +225,28 @@ class FullApiTest extends TestCase
         $response->assertStatus(200);
 
         // Reject an operator request
-        $newOperatorRequest = \App\Models\OperatorRequest::factory()->create();
+        $newOperatorRequest = \App\Models\OperatorRequest::factory()->create(['status' => 'pending']);
         $response = $this->actingAs($this->adminUser, 'sanctum')->postJson('/api/admin/operator-requests/' . $newOperatorRequest->id . '/reject');
         $response->assertStatus(200);
+    }
+
+    public function test_admin_can_get_daily_summary()
+    {
+        // Test with admin user
+        $response = $this->actingAs($this->adminUser, 'sanctum')->getJson('/api/admin/daily-summary');
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'new_users_today',
+            'total_bookings_today',
+            'total_income_today',
+        ]);
+
+        // Test with regular user (should be forbidden)
+        $response = $this->actingAs($this->regularUser, 'sanctum')->getJson('/api/admin/daily-summary');
+        $response->assertStatus(403);
+
+        // Test with operator user (should be forbidden)
+        $response = $this->actingAs($this->operatorUser, 'sanctum')->getJson('/api/admin/daily-summary');
+        $response->assertStatus(403);
     }
 }

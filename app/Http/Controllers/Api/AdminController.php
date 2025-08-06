@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Booking;
+use App\Models\Payment;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use OpenApi\Annotations as OA;
 
@@ -388,5 +390,45 @@ class AdminController extends Controller
     {
         $booking->delete();
         return response()->json(null, 204);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/admin/daily-summary",
+     *     tags={"Admin"},
+     *     summary="Get daily summary statistics (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="new_users_today", type="integer", example=10),
+     *             @OA\Property(property="total_bookings_today", type="integer", example=50),
+     *             @OA\Property(property="total_income_today", type="number", format="float", example=1500.75)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *     )
+     * )
+     */
+    public function dailySummary()
+    {
+        $today = Carbon::today();
+
+        $newUsersToday = User::whereDate('created_at', $today)->count();
+        $totalBookingsToday = Booking::whereDate('created_at', $today)->count();
+        $totalIncomeToday = Payment::whereDate('created_at', $today)->sum('amount');
+
+        return response()->json([
+            'new_users_today' => $newUsersToday,
+            'total_bookings_today' => $totalBookingsToday,
+            'total_income_today' => $totalIncomeToday,
+        ]);
     }
 }
