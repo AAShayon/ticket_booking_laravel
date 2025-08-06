@@ -398,6 +398,7 @@ class RouteController extends Controller
                     'estimated_travel_time' => $route->estimated_travel_time,
                     'vehicle_number' => $route->vehicle_number,
                     'time_of_day' => $route->time_of_day,
+                    'departure_time' => $route->departure_time,
                     'available_seats' => $availableSeats,
                     'vehicle_model' => $route->vehicle->model_number,
                     'vehicle_type' => $route->vehicle->type,

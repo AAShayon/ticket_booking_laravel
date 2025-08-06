@@ -71,4 +71,17 @@ class User extends Authenticatable
     {
         return $this->bookings()->count();
     }
+
+    public function getProfileImageAttribute($value)
+    {
+        if ($value) {
+            // Check if the value is already a full URL
+            if (filter_var($value, FILTER_VALIDATE_URL)) {
+                return $value;
+            }
+            // If it's a relative path, prepend the storage URL
+            return asset('storage/' . $value);
+        }
+        return null;
+    }
 }
