@@ -57,21 +57,41 @@ class AdminController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/AdminUserList")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/AdminUser")),
+     *             @OA\Property(property="first_page_url", type="string", example="http://localhost:8000/api/admin/users?page=1"),
+     *             @OA\Property(property="from", type="integer", example=1),
+     *             @OA\Property(property="last_page", type="integer", example=1),
+     *             @OA\Property(property="last_page_url", type="string", example="http://localhost:8000/api/admin/users?page=1"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://localhost:8000/api/admin/users?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://localhost:8000/api/admin/users"),
+     *             @OA\Property(property="per_page", type="integer", example=15),
+     *             @OA\Property(property="prev_page_url", type="string", example=null),
+     *             @OA\Property(property="to", type="integer", example=15),
+     *             @OA\Property(property="total", type="integer", example=15)
+     *         )
      *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
      *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Unauthorized",
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15)
      *     )
      * )
      */
-    public function getUsers()
+    public function getUsers(Request $request)
     {
-        $users = User::all();
+        $perPage = $request->query('per_page', 15);
+        $users = User::paginate($perPage);
         return response()->json($users);
     }
 
