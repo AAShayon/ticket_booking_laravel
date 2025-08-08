@@ -35,4 +35,15 @@ class Operator extends Model
     {
         return $this->hasMany(Vehicle::class);
     }
+
+    public function getLogoAttribute($value)
+    {
+        if ($value) {
+            if (filter_var($value, FILTER_VALIDATE_URL)) {
+                return $value;
+            }
+            return asset('storage/' . $value);
+        }
+        return null;
+    }
 }

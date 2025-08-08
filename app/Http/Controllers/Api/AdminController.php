@@ -90,7 +90,7 @@ class AdminController extends Controller
      */
     public function getUsers(Request $request)
     {
-        $perPage = $request->query('per_page', 15);
+        $perPage = $request->query('limit', 15);
         $users = User::paginate($perPage);
         return response()->json($users);
     }
