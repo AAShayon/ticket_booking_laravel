@@ -175,7 +175,10 @@ class OperatorController extends Controller
             $operator->vehicles()->create($vehicleData);
         }
 
-        return response()->json($operator->load('vehicles'), 201);
+        return response()->json([
+            'message' => 'Operator created successfully',
+            'data' => $operator->load('vehicles')
+        ], 201);
     }
 
     /**
