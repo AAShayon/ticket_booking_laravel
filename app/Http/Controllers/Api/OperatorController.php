@@ -68,9 +68,10 @@ class OperatorController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $operators = Operator::all();
+        $perPage = $request->query('limit', 15);
+        $operators = Operator::paginate($perPage);
         return response()->json($operators);
     }
 
@@ -86,9 +87,10 @@ class OperatorController extends Controller
      *     )
      * )
      */
-    public function publicIndex()
+    public function publicIndex(Request $request)
     {
-        $operators = Operator::all();
+        $perPage = $request->query('limit', 15);
+        $operators = Operator::paginate($perPage);
         return response()->json($operators);
     }
 
