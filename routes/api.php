@@ -90,5 +90,4 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::get('/operators', [OperatorController::class, 'publicIndex']);
 Route::get('/routes', [RouteController::class, 'publicIndex']);
