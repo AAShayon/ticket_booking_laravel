@@ -47,6 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('/bookings', BookingController::class);
 
+    Route::apiResource('/vehicles', VehicleController::class);
+
     Route::get('/routes/search', [RouteController::class, 'search']);
 
     Route::post('/payments/initiate/{booking}', [PaymentController::class, 'initiatePayment']);
@@ -59,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Operator Routes
     Route::middleware(['role:operator'])->group(function () {
-        Route::apiResource('/vehicles', VehicleController::class);
+        Route::apiResource('/routes', RouteController::class);
     });
 
     // Admin Routes
@@ -79,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('/operators', OperatorController::class);
 
         // Route Management
-        Route::apiResource('/routes', RouteController::class);
+        Route::apiResource('/routes', RouteController::class)->except(['store', 'update', 'destroy']);
 
         // Operator Request Management
         Route::get('/admin/operator-requests', [OperatorRequestController::class, 'index']);

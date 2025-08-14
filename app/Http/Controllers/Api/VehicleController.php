@@ -64,13 +64,25 @@ class VehicleController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $operator = Auth::user()->operator;
-        if (!$operator) {
-            return response()->json(['message' => 'Operator not found for this user.'], 404);
+        $user = Auth::user();
+        $query = Vehicle::query();
+
+        if ($user->role === 'operator') {
+            $operator = $user->operator;
+            if (!$operator) {
+                return response()->json(['message' => 'Operator not found for this user.'], 404);
+            }
+            $query->where('operator_id', $operator->id);
+        } elseif ($user->role === 'admin') {
+            if ($request->has('operator_id')) {
+                $query->where('operator_id', $request->input('operator_id'));
+            }
         }
-        $vehicles = $operator->vehicles;
+
+        $vehicles = $query->paginate(15); // You can adjust the page size
+
         return response()->json($vehicles);
     }
 
@@ -140,26 +152,32 @@ class VehicleController extends Controller
      */
     public function store(Request $request)
     {
-        $operator = Auth::user()->operator;
-        if (!$operator) {
-            return response()->json(['message' => 'Operator not found for this user.'], 404);
-        }
-
         $request->validate([
+            'operator_id' => 'required|exists:operators,id',
             'model_number' => 'required|string|max:255',
             'type' => 'required|string|in:AC,Sleeper,Non-AC,hyundai,scania',
             'capacity' => 'required|integer|min:1',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
+        $user = Auth::user();
+        $operatorId = $request->input('operator_id');
+
+        if ($user->role === 'operator') {
+            $operator = $user->operator;
+            if (!$operator || $operator->id != $operatorId) {
+                return response()->json(['message' => 'You are not authorized to add a vehicle to this operator.'], 403);
+            }
+        }
+
         $data = $request->all();
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('vehicles', 'public');
         }
 
-        $vehicle = $operator->vehicles()->create($data);
+        $vehicle = Vehicle::create($data);
 
-        return response()->json($vehicle, 201);
+        return response()->json(['message' => 'Vehicle created successfully', 'data' => $vehicle], 201);
     }
 
     /**
@@ -251,17 +269,21 @@ class VehicleController extends Controller
      */
     public function update(Request $request, Vehicle $vehicle)
     {
-        $operator = Auth::user()->operator;
-        if (!$operator || $vehicle->operator_id !== $operator->id) {
-            return response()->json(['message' => 'Unauthorized to update this vehicle.'], 403);
-        }
-
         $request->validate([
             'model_number' => 'sometimes|required|string|max:255',
             'type' => 'sometimes|required|string|in:AC,Sleeper,Non-AC,hyundai,scania',
             'capacity' => 'sometimes|required|integer|min:1',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
+
+        $user = Auth::user();
+
+        if ($user->role === 'operator') {
+            $operator = $user->operator;
+            if (!$operator || $vehicle->operator_id != $operator->id) {
+                return response()->json(['message' => 'You are not authorized to update this vehicle.'], 403);
+            }
+        }
 
         $data = $request->all();
         if ($request->hasFile('image')) {
@@ -273,7 +295,7 @@ class VehicleController extends Controller
 
         $vehicle->update($data);
 
-        return response()->json($vehicle);
+        return response()->json(['message' => 'Vehicle updated successfully', 'data' => $vehicle]);
     }
 
     /**
