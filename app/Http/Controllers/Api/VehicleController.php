@@ -81,7 +81,8 @@ class VehicleController extends Controller
             }
         }
 
-        $vehicles = $query->paginate(15); // You can adjust the page size
+        $limit = $request->input('limit', 15);
+        $vehicles = $query->paginate($limit);
 
         return response()->json($vehicles);
     }
