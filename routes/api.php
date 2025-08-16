@@ -81,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('/operators', OperatorController::class);
 
         // Route Management
-        Route::apiResource('/routes', RouteController::class)->except(['store', 'update', 'destroy']);
+        Route::apiResource('/routes', RouteController::class);
 
         // Operator Request Management
         Route::get('/admin/operator-requests', [OperatorRequestController::class, 'index']);
@@ -92,4 +92,4 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::get('/routes', [RouteController::class, 'publicIndex']);
+

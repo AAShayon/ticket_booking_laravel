@@ -231,6 +231,10 @@ class OperatorRequestController extends Controller
         $operatorRequest->status = 'approved';
         $operatorRequest->save();
 
+        $user = $operatorRequest->user;
+        $user->role = 'operator';
+        $user->save();
+
         return response()->json([
             'message' => 'Operator request approved and operator created',
             'operator' => $operator,

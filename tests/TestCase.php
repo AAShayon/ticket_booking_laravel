@@ -29,6 +29,7 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed();
+        $this->seed(\Database\Seeders\TestDataSeeder::class);
+        $this->seed(\Database\Seeders\AdminUserSeeder::class);
     }
 }

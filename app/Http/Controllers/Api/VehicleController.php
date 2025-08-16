@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
+use App\Http\Resources\VehicleResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -82,9 +83,9 @@ class VehicleController extends Controller
         }
 
         $limit = $request->input('limit', 15);
-        $vehicles = $query->paginate($limit);
+        $vehicles = $query->with('routes')->paginate($limit);
 
-        return response()->json($vehicles);
+        return VehicleResource::collection($vehicles);
     }
 
     /**
@@ -169,6 +170,8 @@ class VehicleController extends Controller
             if (!$operator || $operator->id != $operatorId) {
                 return response()->json(['message' => 'You are not authorized to add a vehicle to this operator.'], 403);
             }
+        } elseif ($user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $data = $request->all();
@@ -215,10 +218,19 @@ class VehicleController extends Controller
      */
     public function show(Vehicle $vehicle)
     {
-        $operator = Auth::user()->operator;
-        if (!$operator || $vehicle->operator_id !== $operator->id) {
-            return response()->json(['message' => 'Unauthorized to view this vehicle.'], 403);
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            // Admin can view any vehicle
+        } elseif ($user->role === 'operator') {
+            $operator = $user->operator;
+            if (!$operator || $vehicle->operator_id !== $operator->id) {
+                return response()->json(['message' => 'Unauthorized to view this vehicle.'], 403);
+            }
+        } else {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
+
         return response()->json($vehicle);
     }
 
@@ -284,6 +296,8 @@ class VehicleController extends Controller
             if (!$operator || $vehicle->operator_id != $operator->id) {
                 return response()->json(['message' => 'You are not authorized to update this vehicle.'], 403);
             }
+        } elseif ($user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $data = $request->all();
@@ -332,9 +346,15 @@ class VehicleController extends Controller
      */
     public function destroy(Vehicle $vehicle)
     {
-        $operator = Auth::user()->operator;
-        if (!$operator || $vehicle->operator_id !== $operator->id) {
-            return response()->json(['message' => 'Unauthorized to delete this vehicle.'], 403);
+        $user = Auth::user();
+
+        if ($user->role === 'operator') {
+            $operator = $user->operator;
+            if (!$operator || $vehicle->operator_id !== $operator->id) {
+                return response()->json(['message' => 'Unauthorized to delete this vehicle.'], 403);
+            }
+        } elseif ($user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         if ($vehicle->image) {

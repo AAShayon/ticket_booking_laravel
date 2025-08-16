@@ -69,10 +69,45 @@ class RouteController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $routes = Route::all();
-        return response()->json($routes);
+        $query = \App\Models\Route::query();
+
+        if ($request->has('origin')) {
+            $query->where('origin', 'like', '%' . $request->input('origin') . '%');
+        }
+
+        if ($request->has('destination')) {
+            $query->where('destination', 'like', '%' . $request->input('destination') . '%');
+        }
+
+        if ($request->has('operator_id')) {
+            $query->where('operator_id', $request->input('operator_id'));
+        }
+
+        if ($request->has('min_fare')) {
+            $query->where('fare', '>=', $request->input('min_fare'));
+        }
+
+        if ($request->has('max_fare')) {
+            $query->where('fare', '<=', $request->input('max_fare'));
+        }
+
+        if ($request->has('date')) {
+            // Assuming 'date' is stored as a date column or part of created_at/updated_at
+            // You might need to adjust this based on how dates are stored for routes
+            $query->whereDate('created_at', $request->input('date'));
+        }
+
+        // Sorting
+        if ($request->has('sort_by') && $request->has('sort_order')) {
+            $query->orderBy($request->input('sort_by'), $request->input('sort_order', 'asc'));
+        }
+
+        $perPage = $request->input('limit', 15);
+        $routes = $query->with('operator', 'vehicle')->paginate($perPage);
+
+        return \App\Http\Resources\RouteResource::collection($routes);
     }
 
     /**
@@ -89,8 +124,8 @@ class RouteController extends Controller
      */
     public function publicIndex()
     {
-        $routes = Route::all();
-        return response()->json($routes);
+        $routes = \App\Models\Route::with('operator', 'vehicle')->get();
+        return \App\Http\Resources\RouteResource::collection($routes);
     }
 
     /**

@@ -29,17 +29,15 @@ class FullApiTest extends TestCase
     {
         $response = $this->getJson('/api/operators/public');
         $response->assertStatus(200);
-        $response->assertJsonCount(2); // Assuming 2 operators from TestDataSeeder
+        $response->assertJsonCount(2, 'data'); // Assuming 2 operators from TestDataSeeder
     }
 
     public function test_public_can_view_routes()
     {
         $response = $this->getJson('/api/routes/public');
         $response->assertStatus(200);
-        $response->assertJsonCount(4); // Assuming 4 routes from TestDataSeeder
+        $response->assertJsonCount(4, 'data'); // Assuming 4 routes from TestDataSeeder
     }
-
-    // Test auth routes
     public function test_user_can_register()
     {
         $response = $this->postJson('/api/register', [
@@ -149,7 +147,7 @@ class FullApiTest extends TestCase
         // View all operators
         $response = $this->actingAs($this->adminUser, 'sanctum')->getJson('/api/operators');
         $response->assertStatus(200);
-        $response->assertJsonCount(2); // Assuming 2 operators from TestDataSeeder
+        $response->assertJsonCount(2, 'data'); // Assuming 2 operators from TestDataSeeder
 
         // Create a new operator
         $newUser = \App\Models\User::factory()->create();
@@ -184,7 +182,7 @@ class FullApiTest extends TestCase
         // View all routes
         $response = $this->actingAs($this->adminUser, 'sanctum')->getJson('/api/routes');
         $response->assertStatus(200);
-        $response->assertJsonCount(4); // Assuming 4 routes from TestDataSeeder
+        $response->assertJsonCount(4, 'data'); // Assuming 4 routes from TestDataSeeder
 
         // Create a new route
         $operator = \App\Models\Operator::first();

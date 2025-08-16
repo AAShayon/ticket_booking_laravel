@@ -15,17 +15,18 @@ class RouteResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'operator_id' => $this->operator_id,
+            'route_id' => $this->id,
             'origin' => $this->origin,
             'destination' => $this->destination,
-            'fare' => $this->fare,
+            'fare_per_seat' => $this->fare_per_seat,
+            'departure_time' => $this->departure_time,
             'estimated_travel_time' => $this->estimated_travel_time,
             'vehicle_number' => $this->vehicle_number,
             'time_of_day' => $this->time_of_day,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'operator' => new OperatorResource($this->whenLoaded('operator')),
+            'vehicle' => new \App\Http\Resources\VehicleResource($this->whenLoaded('vehicle')),
+            'operator_name' => $this->whenLoaded('operator', function () {
+                return $this->operator->name;
+            }),
         ];
     }
 }

@@ -22,6 +22,11 @@ class Vehicle extends Model
         return $this->belongsTo(Operator::class);
     }
 
+    public function routes()
+    {
+        return $this->hasMany(Route::class);
+    }
+
     public function getImageAttribute($value)
     {
         if ($value) {

@@ -29,7 +29,7 @@ class AdminTest extends TestCase
         $response = $this->actingAs($this->adminUser, 'sanctum')->getJson('/api/admin/users');
 
         $response->assertStatus(200)
-                 ->assertJsonCount(2); // Admin and regular user
+                 ->assertJsonCount(2, 'data'); // Admin and regular user
     }
 
     public function test_regular_user_cannot_get_all_users()
