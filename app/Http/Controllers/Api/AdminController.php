@@ -414,26 +414,41 @@ class AdminController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/admin/daily-summary",
+     *     path="/api/admin/daily-summery",
      *     tags={"Admin"},
-     *     summary="Get daily summary statistics (Admin only)",
+     *     summary="Get a daily summary for the admin dashboard.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
      *         @OA\JsonContent(
-     *             @OA\Property(property="new_users_today", type="integer", example=10),
-     *             @OA\Property(property="total_bookings_today", type="integer", example=50),
-     *             @OA\Property(property="total_income_today", type="number", format="float", example=1500.75)
+     *             @OA\Property(
+     *                 property="metrics",
+     *                 type="object",
+     *                 @OA\Property(property="new_users_today", type="integer", example=42),
+     *                 @OA\Property(property="pending_operator_requests", type="integer", example=5),
+     *                 @OA\Property(property="total_bookings", type="integer", example=128),
+     *                 @OA\Property(property="todays_revenue", type="number", format="float", example=3420.50)
+     *             ),
+     *             @OA\Property(
+     *                 property="recent_activities",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="type", type="string", example="new_booking"),
+     *                     @OA\Property(property="text", type="string", example="New booking: PNR784523"),
+     *                     @OA\Property(property="timestamp", type="string", format="date-time", example="2025-08-16T10:32:15.000000Z")
+     *                 )
+     *             )
      *         )
      *     ),
      *     @OA\Response(
      *         response=401,
-     *         description="Unauthenticated",
+     *         description="Unauthenticated"
      *     ),
      *     @OA\Response(
      *         response=403,
-     *         description="Unauthorized",
+     *         description="Forbidden"
      *     )
      * )
      */
@@ -441,14 +456,147 @@ class AdminController extends Controller
     {
         $today = Carbon::today();
 
+        // Metrics
         $newUsersToday = User::whereDate('created_at', $today)->count();
-        $totalBookingsToday = Booking::whereDate('created_at', $today)->count();
-        $totalIncomeToday = Payment::whereDate('created_at', $today)->sum('amount');
+        $pendingOperatorRequests = \App\Models\OperatorRequest::where('status', 'pending')->count();
+        $totalBookings = Booking::whereDate('created_at', $today)->count();
+        $todaysRevenue = Booking::whereDate('created_at', $today)->sum('total_fare');
+
+        // Recent Activities
+        $bookings = Booking::with('pnr')->latest()->limit(5)->get()->map(function ($item) {
+            return [
+                'type' => 'new_booking',
+                'text' => 'New booking: ' . ($item->pnr ? $item->pnr->pnr_number : 'N/A'),
+                'timestamp' => $item->created_at,
+            ];
+        });
+
+        $users = User::latest()->limit(5)->get()->map(function ($item) {
+            return [
+                'type' => 'new_user',
+                'text' => 'New user: ' . $item->email,
+                'timestamp' => $item->created_at,
+            ];
+        });
+
+        $operators = \App\Models\Operator::latest()->limit(5)->get()->map(function ($item) {
+            return [
+                'type' => 'new_operator',
+                'text' => 'New operator: ' . $item->name,
+                'timestamp' => $item->created_at,
+            ];
+        });
+
+        $allActivities = $bookings->toBase()->merge($users)->merge($operators);
+        $recentActivities = $allActivities->sortByDesc('timestamp')->take(10)->values();
 
         return response()->json([
-            'new_users_today' => $newUsersToday,
-            'total_bookings_today' => $totalBookingsToday,
-            'total_income_today' => $totalIncomeToday,
+            'metrics' => [
+                'new_users_today' => $newUsersToday,
+                'pending_operator_requests' => $pendingOperatorRequests,
+                'total_bookings' => $totalBookings,
+                'todays_revenue' => (float) $todaysRevenue,
+            ],
+            'recent_activities' => $recentActivities,
         ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/admin/recent-activities",
+     *     tags={"Admin"},
+     *     summary="Get all recent activities with pagination.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Number of items per page (5, 10, 15)",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15, enum={5, 10, 15})
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="type", type="string", example="new_booking"),
+     *                     @OA\Property(property="text", type="string", example="New booking: PNR784523"),
+     *                     @OA\Property(property="timestamp", type="string", format="date-time", example="2025-08-16T10:32:15.000000Z")
+     *                 )
+     *             ),
+     *             @OA\Property(property="first_page_url", type="string", example="http://localhost/api/admin/recent-activities?page=1"),
+     *             @OA\Property(property="from", type="integer", example=1),
+     *             @OA\Property(property="last_page", type="integer", example=1),
+     *             @OA\Property(property="last_page_url", type="string", example="http://localhost/api/admin/recent-activities?page=1"),
+     *             @OA\Property(property="next_page_url", type="string", example=null),
+     *             @OA\Property(property="path", type="string", example="http://localhost/api/admin/recent-activities"),
+     *             @OA\Property(property="per_page", type="integer", example=15),
+     *             @OA\Property(property="prev_page_url", type="string", example=null),
+     *             @OA\Property(property="to", type="integer", example=10),
+     *             @OA\Property(property="total", type="integer", example=10)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden"
+     *     )
+     * )
+     */
+    public function recentActivities(Request $request)
+    {
+        $page = $request->input('page', 1);
+        $perPage = $request->input('limit', 15);
+
+        $bookings = Booking::with('pnr')->latest()->get()->map(function ($item) {
+            return [
+                'type' => 'new_booking',
+                'text' => 'New booking: ' . ($item->pnr ? $item->pnr->pnr_number : 'N/A'),
+                'timestamp' => $item->created_at,
+            ];
+        });
+
+        $users = User::latest()->get()->map(function ($item) {
+            return [
+                'type' => 'new_user',
+                'text' => 'New user: ' . $item->email,
+                'timestamp' => $item->created_at,
+            ];
+        });
+
+        $operators = \App\Models\Operator::latest()->get()->map(function ($item) {
+            return [
+                'type' => 'new_operator',
+                'text' => 'New operator: ' . $item->name,
+                'timestamp' => $item->created_at,
+            ];
+        });
+
+        $allActivities = $bookings->toBase()->merge($users)->merge($operators)->sortByDesc('timestamp');
+
+        $paginatedActivities = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allActivities->forPage($page, $perPage)->values(),
+            $allActivities->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return response()->json($paginatedActivities);
     }
 }

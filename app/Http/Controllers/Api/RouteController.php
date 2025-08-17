@@ -180,7 +180,7 @@ class RouteController extends Controller
             'fare_per_seat' => 'required|numeric|min:0',
             'estimated_travel_time' => 'nullable|string',
             'vehicle_number' => 'required|string|max:255',
-            'time_of_day' => 'required|string|in:morning,day,evening,night,am,pm',
+            'time_of_day' => 'required|string|in:morning,afternoon,evening,night,am,pm',
             'departure_time' => 'required|date_format:H:i:s',
         ]);
 
@@ -288,7 +288,7 @@ class RouteController extends Controller
             'fare_per_seat' => 'sometimes|required|numeric|min:0',
             'estimated_travel_time' => 'nullable|string',
             'vehicle_number' => 'sometimes|required|string|max:255',
-            'time_of_day' => 'sometimes|required|string|in:morning,day,evening,night,am,pm',
+            'time_of_day' => 'sometimes|required|string|in:morning,afternoon,evening,night,am,pm',
             'departure_time' => 'sometimes|required|date_format:H:i:s',
         ]);
 

@@ -88,7 +88,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/operator-requests/{operatorRequest}', [OperatorRequestController::class, 'show']);
         Route::post('/admin/operator-requests/{operatorRequest}/approve', [OperatorRequestController::class, 'approve']);
         Route::post('/admin/operator-requests/{operatorRequest}/reject', [OperatorRequestController::class, 'reject']);
-        Route::get('/admin/daily-summary', [AdminController::class, 'dailySummary']);
+        Route::get('/admin/daily-summery', [AdminController::class, 'dailySummary']);
+        Route::get('/admin/recent-activities', [AdminController::class, 'recentActivities']);
     });
 });
 
