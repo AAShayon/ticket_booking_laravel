@@ -307,6 +307,13 @@ class AdminController extends Controller
      *     tags={"Admin"},
      *     summary="Get all bookings (Admin only)",
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Number of items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -322,9 +329,10 @@ class AdminController extends Controller
      *     )
      * )
      */
-    public function getAllBookings()
+    public function getAllBookings(Request $request)
     {
-        $bookings = Booking::with('user')->get();
+        $limit = $request->input('limit', 15);
+        $bookings = Booking::with('user')->paginate($limit);
         return response()->json($bookings);
     }
 

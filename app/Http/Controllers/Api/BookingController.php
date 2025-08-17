@@ -24,6 +24,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="journey_date", type="string", format="date", example="2025-12-25"),
  *     @OA\Property(property="seat_type", type="string", example="Economy"),
  *     @OA\Property(property="number_of_seats", type="integer", example=2),
+ *     @OA\Property(property="seat_number", type="array", @OA\Items(type="string"), example={"A1", "A2"}),
  *     @OA\Property(property="total_fare", type="number", format="float", example=100.00),
  *     @OA\Property(property="status", type="string", example="pending"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
@@ -71,13 +72,14 @@ class BookingController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"from_station","to_station","journey_date","seat_type","number_of_seats","total_fare"},
+     *             required={"from_station","to_station","journey_date","seat_type","number_of_seats","total_fare", "seat_number"},
      *             @OA\Property(property="from_station", type="string", example="Station C"),
      *             @OA\Property(property="to_station", type="string", example="Station D"),
      *             @OA\Property(property="journey_date", type="string", format="date", example="2025-12-30"),
      *             @OA\Property(property="seat_type", type="string", example="Business"),
      *             @OA\Property(property="number_of_seats", type="integer", example=1),
      *             @OA\Property(property="total_fare", type="number", format="float", example=250.00),
+     *             @OA\Property(property="seat_number", type="array", @OA\Items(type="string"), example={"A1", "A2"}),
      *         )
      *     ),
      *     @OA\Response(
@@ -106,6 +108,7 @@ class BookingController extends Controller
             'number_of_seats' => 'required|integer|min:1',
             'total_fare' => 'required|numeric|min:0',
             'route_id' => 'required|exists:routes,id',
+            'seat_number' => 'nullable|array',
         ]);
 
         $booking = Auth::user()->bookings()->create(array_merge($request->all(), ['status' => 'pending', 'route_id' => $request->route_id]));

@@ -19,6 +19,11 @@ class Booking extends Model
         'total_fare',
         'status',
         'route_id',
+        'seat_number',
+    ];
+
+    protected $casts = [
+        'seat_number' => 'array',
     ];
 
     public function user()
