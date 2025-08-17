@@ -27,6 +27,9 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="seat_number", type="array", @OA\Items(type="string"), example={"A1", "A2"}),
  *     @OA\Property(property="total_fare", type="number", format="float", example=100.00),
  *     @OA\Property(property="status", type="string", example="pending"),
+ *     @OA\Property(property="payment_method", type="string", example="online", enum={"cash", "online"}),
+ *     @OA\Property(property="payment_name", type="string", example="Stripe", description="e.g., Cash, Stripe, PayPal"),
+ *     @OA\Property(property="transaction_id", type="string", nullable=true, example="txn_123abc"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  * )
@@ -72,7 +75,7 @@ class BookingController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"from_station","to_station","journey_date","seat_type","number_of_seats","total_fare", "seat_number"},
+     *             required={"from_station","to_station","journey_date","seat_type","number_of_seats","total_fare", "seat_number", "payment_method", "payment_name"},
      *             @OA\Property(property="from_station", type="string", example="Station C"),
      *             @OA\Property(property="to_station", type="string", example="Station D"),
      *             @OA\Property(property="journey_date", type="string", format="date", example="2025-12-30"),
@@ -80,6 +83,9 @@ class BookingController extends Controller
      *             @OA\Property(property="number_of_seats", type="integer", example=1),
      *             @OA\Property(property="total_fare", type="number", format="float", example=250.00),
      *             @OA\Property(property="seat_number", type="array", @OA\Items(type="string"), example={"A1", "A2"}),
+     *             @OA\Property(property="payment_method", type="string", example="online", enum={"cash", "online"}),
+     *             @OA\Property(property="payment_name", type="string", example="Stripe", description="e.g., Cash, Stripe, PayPal"),
+     *             @OA\Property(property="transaction_id", type="string", nullable=true, example="txn_123abc", description="Required if payment_method is 'online'"),
      *         )
      *     ),
      *     @OA\Response(
@@ -109,6 +115,9 @@ class BookingController extends Controller
             'total_fare' => 'required|numeric|min:0',
             'route_id' => 'required|exists:routes,id',
             'seat_number' => 'nullable|array',
+            'payment_method' => 'required|string|in:cash,online',
+            'payment_name' => 'required|string',
+            'transaction_id' => 'required_if:payment_method,online|nullable|string',
         ]);
 
         $booking = Auth::user()->bookings()->create(array_merge($request->all(), ['status' => 'pending', 'route_id' => $request->route_id]));
