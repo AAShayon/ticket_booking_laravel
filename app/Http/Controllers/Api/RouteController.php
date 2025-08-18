@@ -31,6 +31,9 @@ use Illuminate\Validation\Rule;
  *     @OA\Property(property="fare_per_seat", type="number", format="float", example=500.00, description="Fare per seat for this route"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
+ *     @OA\Property(property="available_seats", type="integer", example=30, description="Number of available seats for a given journey_date (if provided in search)"),
+ *     @OA\Property(property="vehicle_model", type="string", example="Volvo B11R", description="Model number of the vehicle"),
+ *     @OA\Property(property="vehicle_type", type="string", example="AC", description="Type of the vehicle (e.g., AC, non-AC)"),
  * )
  *
  * @OA\Schema(
@@ -115,13 +118,70 @@ class RouteController extends Controller
      *     path="/routes/public",
      *     tags={"Routes"},
      *     summary="Get all bus routes (Publicly accessible)",
+     *     description="Retrieves a list of publicly accessible bus routes. Supports filtering by origin, destination, fare range, vehicle type, time of day, and journey date. If journey_date is provided, available seats are calculated and routes with no available seats are excluded.",
+     *     @OA\Parameter(
+     *         name="origin",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string"),
+     *         description="Origin station (partial match)",
+     *     ),
+     *     @OA\Parameter(
+     *         name="destination",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string"),
+     *         description="Destination station (partial match)",
+     *     ),
+     *     @OA\Parameter(
+     *         name="minFare",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="number", format="float"),
+     *         description="Minimum fare per seat",
+     *     ),
+     *     @OA\Parameter(
+     *         name="maxFare",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="number", format="float"),
+     *         description="Maximum fare per seat",
+     *     ),
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"AC", "non-AC", "sleeper", "hyundai"}),
+     *         description="Vehicle type",
+     *     ),
+     *     @OA\Parameter(
+     *         name="time_of_day",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"morning", "afternoon", "evening", "night", "am", "pm"}),
+     *         description="Time of day for departure",
+     *     ),
+     *     @OA\Parameter(
+     *         name="journey_date",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2025-09-20"),
+     *         description="Date of journey (YYYY-MM-DD). If provided, available seats are calculated and routes with no availability are excluded.",
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/BusRouteList")
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/BusRoute")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
      *     )
      * )
-     */
     public function publicIndex(Request $request)
     {
         $request->validate([

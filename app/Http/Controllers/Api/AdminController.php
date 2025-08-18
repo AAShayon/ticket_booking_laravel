@@ -46,6 +46,17 @@ use OpenApi\Annotations as OA;
  *     type="array",
  *     @OA\Items(ref="#/components/schemas/Booking")
  * )
+ *
+ * @OA\Schema(
+ *     schema="Pnr",
+ *     title="PNR",
+ *     description="PNR (Passenger Name Record) details",
+ *     @OA\Property(property="id", type="integer", format="int64", example=1),
+ *     @OA\Property(property="booking_id", type="integer", format="int64", example=1),
+ *     @OA\Property(property="pnr_number", type="string", example="ABCDEF"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
+ * )
  */
 class AdminController extends Controller
 {
@@ -308,6 +319,7 @@ class AdminController extends Controller
      *     path="/admin/bookings",
      *     tags={"Admin"},
      *     summary="Get all bookings (Admin only)",
+     *     description="Retrieves a paginated list of all bookings in the system. Includes user_id and pnr_number directly in the booking object.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="limit",
@@ -319,7 +331,39 @@ class AdminController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/AdminBookingList")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="from_station", type="string", example="Dhaka"),
+     *                 @OA\Property(property="to_station", type="string", example="Chittagong"),
+     *                 @OA\Property(property="journey_date", type="string", format="date", example="2025-12-25"),
+     *                 @OA\Property(property="seat_type", type="string", example="Economy"),
+     *                 @OA\Property(property="number_of_seats", type="integer", example=2),
+     *                 @OA\Property(property="seat_number", type="array", @OA\Items(type="string"), example={"A1", "A2"}),
+     *                 @OA\Property(property="total_fare", type="number", format="float", example=100.00),
+     *                 @OA\Property(property="status", type="string", example="confirmed"),
+     *                 @OA\Property(property="payment_method", type="string", example="cash"),
+     *                 @OA\Property(property="payment_name", type="string", example="Cash"),
+     *                 @OA\Property(property="transaction_id", type="string", nullable=true, example="txn_123"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00Z"),
+     *                 @OA\Property(property="route_id", type="integer", example=1),
+     *                 @OA\Property(property="pnr_number", type="string", nullable=true, example="ABCDEF", description="PNR number if generated")
+     *             )),
+     *             @OA\Property(property="first_page_url", type="string", example="http://localhost:8000/api/admin/bookings?page=1"),
+     *             @OA\Property(property="from", type="integer", example=1),
+     *             @OA\Property(property="last_page", type="integer", example=1),
+     *             @OA\Property(property="last_page_url", type="string", example="http://localhost:8000/api/admin/bookings?page=1"),
+     *             @OA\Property(property="next_page_url", type="string", nullable=true, example=null),
+     *             @OA\Property(property="path", type="string", example="http://localhost:8000/api/admin/bookings"),
+     *             @OA\Property(property="per_page", type="integer", example=15),
+     *             @OA\Property(property="prev_page_url", type="string", nullable=true, example=null),
+     *             @OA\Property(property="to", type="integer", example=1),
+     *             @OA\Property(property="total", type="integer", example=1)
+     *         )
      *     ),
      *     @OA\Response(
      *         response=401,
@@ -356,6 +400,7 @@ class AdminController extends Controller
      *     path="/admin/bookings/{booking}/status",
      *     tags={"Admin"},
      *     summary="Update booking status (Admin only)",
+     *     description="Updates the status of a booking. If a pending cash booking is confirmed, a PNR will be generated.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="booking",
@@ -374,7 +419,10 @@ class AdminController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Booking status updated successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/Booking")
+     *         @OA\JsonContent(
+     *             ref="#/components/schemas/Booking",
+     *             @OA\Property(property="pnr", ref="#/components/schemas/Pnr", description="Associated PNR details if generated")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=403,

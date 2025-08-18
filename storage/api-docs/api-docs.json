@@ -26,22 +26,90 @@
                 ],
                 "summary": "Get all users (Admin only)",
                 "operationId": "afab67256b9405de17d3e13f2eae9c4e",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AdminUserList"
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AdminUser"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/users?page=1"
+                                        },
+                                        "from": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/users?page=1"
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/users?page=2"
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/users"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "example": null
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 15
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Unauthenticated"
-                    },
-                    "403": {
-                        "description": "Unauthorized"
                     }
                 },
                 "security": [
@@ -299,14 +367,164 @@
                     "Admin"
                 ],
                 "summary": "Get all bookings (Admin only)",
+                "description": "Retrieves a paginated list of all bookings in the system. Includes user_id and pnr_number directly in the booking object.",
                 "operationId": "67a5de392c293c3e74d1e5403af20b82",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AdminBookingList"
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "from_station": {
+                                                        "type": "string",
+                                                        "example": "Dhaka"
+                                                    },
+                                                    "to_station": {
+                                                        "type": "string",
+                                                        "example": "Chittagong"
+                                                    },
+                                                    "journey_date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-12-25"
+                                                    },
+                                                    "seat_type": {
+                                                        "type": "string",
+                                                        "example": "Economy"
+                                                    },
+                                                    "number_of_seats": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "seat_number": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "example": [
+                                                            "A1",
+                                                            "A2"
+                                                        ]
+                                                    },
+                                                    "total_fare": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "confirmed"
+                                                    },
+                                                    "payment_method": {
+                                                        "type": "string",
+                                                        "example": "cash"
+                                                    },
+                                                    "payment_name": {
+                                                        "type": "string",
+                                                        "example": "Cash"
+                                                    },
+                                                    "transaction_id": {
+                                                        "type": "string",
+                                                        "example": "txn_123",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-01-01T00:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-01-01T00:00:00Z"
+                                                    },
+                                                    "route_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "pnr_number": {
+                                                        "description": "PNR number if generated",
+                                                        "type": "string",
+                                                        "example": "ABCDEF",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/bookings?page=1"
+                                        },
+                                        "from": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/bookings?page=1"
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/bookings"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -331,6 +549,7 @@
                     "Admin"
                 ],
                 "summary": "Update booking status (Admin only)",
+                "description": "Updates the status of a booking. If a pending cash booking is confirmed, a PNR will be generated.",
                 "operationId": "f8c648a237f8e7b1a8fd1dc96f2b2be4",
                 "parameters": [
                     {
@@ -438,13 +657,13 @@
                 ]
             }
         },
-        "/admin/daily-summary": {
+        "/api/admin/daily-summery": {
             "get": {
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Get daily summary statistics (Admin only)",
-                "operationId": "cbceaf5de38af3c2201d99f92378ccb9",
+                "summary": "Get a daily summary for the admin dashboard.",
+                "operationId": "e4118299953990b204f1b3535e5c478e",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -452,18 +671,48 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "new_users_today": {
-                                            "type": "integer",
-                                            "example": 10
+                                        "metrics": {
+                                            "properties": {
+                                                "new_users_today": {
+                                                    "type": "integer",
+                                                    "example": 42
+                                                },
+                                                "pending_operator_requests": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "total_bookings": {
+                                                    "type": "integer",
+                                                    "example": 128
+                                                },
+                                                "todays_revenue": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 3420.5
+                                                }
+                                            },
+                                            "type": "object"
                                         },
-                                        "total_bookings_today": {
-                                            "type": "integer",
-                                            "example": 50
-                                        },
-                                        "total_income_today": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 1500.75
+                                        "recent_activities": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "new_booking"
+                                                    },
+                                                    "text": {
+                                                        "type": "string",
+                                                        "example": "New booking: PNR784523"
+                                                    },
+                                                    "timestamp": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-08-16T10:32:15.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -475,7 +724,133 @@
                         "description": "Unauthenticated"
                     },
                     "403": {
-                        "description": "Unauthorized"
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/recent-activities": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get all recent activities with pagination.",
+                "operationId": "dfea698f1bff7c876419e47f2bbcd198",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page (5, 10, 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15,
+                            "enum": [
+                                5,
+                                10,
+                                15
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "new_booking"
+                                                    },
+                                                    "text": {
+                                                        "type": "string",
+                                                        "example": "New booking: PNR784523"
+                                                    },
+                                                    "timestamp": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-08-16T10:32:15.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/admin/recent-activities?page=1"
+                                        },
+                                        "from": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/admin/recent-activities?page=1"
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "example": null
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/admin/recent-activities"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "example": null
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 10
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
                     }
                 },
                 "security": [
@@ -712,6 +1087,7 @@
                     "Bookings"
                 ],
                 "summary": "Create a new booking",
+                "description": "Creates a new booking. Admin/Operator bookings are auto-confirmed. Regular user bookings are confirmed for online payments, pending for cash payments. Includes seat validation to prevent overbooking.",
                 "operationId": "166547aa028b063e31d6efe9c093aa88",
                 "requestBody": {
                     "required": true,
@@ -724,16 +1100,19 @@
                                     "journey_date",
                                     "seat_type",
                                     "number_of_seats",
-                                    "total_fare"
+                                    "total_fare",
+                                    "seat_number",
+                                    "payment_method",
+                                    "payment_name"
                                 ],
                                 "properties": {
                                     "from_station": {
                                         "type": "string",
-                                        "example": "Station C"
+                                        "example": "Dhaka"
                                     },
                                     "to_station": {
                                         "type": "string",
-                                        "example": "Station D"
+                                        "example": "Chittagong"
                                     },
                                     "journey_date": {
                                         "type": "string",
@@ -742,9 +1121,10 @@
                                     },
                                     "seat_type": {
                                         "type": "string",
-                                        "example": "Business"
+                                        "example": "Economy"
                                     },
                                     "number_of_seats": {
+                                        "description": "Number of seats requested. Must match the count of 'seat_number' array.",
                                         "type": "integer",
                                         "example": 1
                                     },
@@ -752,6 +1132,40 @@
                                         "type": "number",
                                         "format": "float",
                                         "example": 250
+                                    },
+                                    "route_id": {
+                                        "description": "ID of the route for the booking.",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "seat_number": {
+                                        "description": "Array of specific seat numbers to book. Must match 'number_of_seats' count and contain unique, available seats.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "A1"
+                                        ]
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "cash",
+                                            "online"
+                                        ],
+                                        "example": "online"
+                                    },
+                                    "payment_name": {
+                                        "description": "e.g., Cash, Stripe, PayPal",
+                                        "type": "string",
+                                        "example": "Stripe"
+                                    },
+                                    "transaction_id": {
+                                        "description": "Required if payment_method is 'online'",
+                                        "type": "string",
+                                        "example": "txn_123abc",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -771,11 +1185,30 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error",
+                        "description": "Validation error or seat booking error",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ValidationError"
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "seat_number": [
+                                                    "The seat number field is required."
+                                                ]
+                                            }
+                                        },
+                                        "custom_message": {
+                                            "description": "Custom error message for seat validation issues",
+                                            "type": "string",
+                                            "example": "Not enough seats available for this route and date."
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -797,6 +1230,7 @@
                     "Bookings"
                 ],
                 "summary": "Get a specific booking by ID",
+                "description": "Retrieves a specific booking by ID, including associated PNR, Route, Vehicle, and Operator details.",
                 "operationId": "9a7e24b15b1f9fe6c357532b3c5200a3",
                 "parameters": [
                     {
@@ -2324,14 +2758,111 @@
                     "Routes"
                 ],
                 "summary": "Get all bus routes (Publicly accessible)",
-                "operationId": "514cacf4fda2a5b9341d148943ec6aa9",
+                "description": "Retrieves a list of publicly accessible bus routes. Supports filtering by origin, destination, fare range, vehicle type, time of day, and journey date. If journey_date is provided, available seats are calculated and routes with no available seats are excluded.",
+                "operationId": "015d6e3fecad6f1418651fdacf37ee20",
+                "parameters": [
+                    {
+                        "name": "origin",
+                        "in": "query",
+                        "description": "Origin station (partial match)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "destination",
+                        "in": "query",
+                        "description": "Destination station (partial match)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "minFare",
+                        "in": "query",
+                        "description": "Minimum fare per seat",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "maxFare",
+                        "in": "query",
+                        "description": "Maximum fare per seat",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Vehicle type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "AC",
+                                "non-AC",
+                                "sleeper",
+                                "hyundai"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "time_of_day",
+                        "in": "query",
+                        "description": "Time of day for departure",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "morning",
+                                "afternoon",
+                                "evening",
+                                "night",
+                                "am",
+                                "pm"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "journey_date",
+                        "in": "query",
+                        "description": "Date of journey (YYYY-MM-DD). If provided, available seats are calculated and routes with no availability are excluded.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-09-20"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/BusRouteList"
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BusRoute"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
                                 }
                             }
                         }
@@ -3052,6 +3583,45 @@
                     }
                 ]
             },
+            "Pnr": {
+                "title": "PNR",
+                "description": "PNR (Passenger Name Record) details",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "booking_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "pnr_number": {
+                                "type": "string",
+                                "example": "ABCDEF"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
             "Booking": {
                 "title": "Booking",
                 "type": "object",
@@ -3092,6 +3662,17 @@
                                 "type": "integer",
                                 "example": 2
                             },
+                            "seat_number": {
+                                "description": "Array of selected seat numbers",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "A1",
+                                    "A2"
+                                ]
+                            },
                             "total_fare": {
                                 "type": "number",
                                 "format": "float",
@@ -3100,6 +3681,30 @@
                             "status": {
                                 "type": "string",
                                 "example": "pending"
+                            },
+                            "payment_method": {
+                                "type": "string",
+                                "enum": [
+                                    "cash",
+                                    "online"
+                                ],
+                                "example": "online"
+                            },
+                            "payment_name": {
+                                "description": "e.g., Cash, Stripe, PayPal",
+                                "type": "string",
+                                "example": "Stripe"
+                            },
+                            "transaction_id": {
+                                "type": "string",
+                                "example": "txn_123abc",
+                                "nullable": true
+                            },
+                            "pnr_number": {
+                                "description": "PNR number generated for confirmed bookings",
+                                "type": "string",
+                                "example": "ABCDEF",
+                                "nullable": true
                             },
                             "created_at": {
                                 "type": "string",
@@ -3110,6 +3715,15 @@
                                 "type": "string",
                                 "format": "date-time",
                                 "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "route": {
+                                "$ref": "#/components/schemas/BusRoute"
+                            },
+                            "vehicle": {
+                                "$ref": "#/components/schemas/Vehicle"
+                            },
+                            "operator": {
+                                "$ref": "#/components/schemas/Operator"
                             }
                         },
                         "type": "object"
@@ -3403,6 +4017,21 @@
                                 "type": "string",
                                 "format": "date-time",
                                 "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "available_seats": {
+                                "description": "Number of available seats for a given journey_date (if provided in search)",
+                                "type": "integer",
+                                "example": 30
+                            },
+                            "vehicle_model": {
+                                "description": "Model number of the vehicle",
+                                "type": "string",
+                                "example": "Volvo B11R"
+                            },
+                            "vehicle_type": {
+                                "description": "Type of the vehicle (e.g., AC, non-AC)",
+                                "type": "string",
+                                "example": "AC"
                             }
                         },
                         "type": "object"

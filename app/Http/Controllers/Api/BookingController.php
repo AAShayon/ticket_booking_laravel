@@ -27,14 +27,18 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="journey_date", type="string", format="date", example="2025-12-25"),
  *     @OA\Property(property="seat_type", type="string", example="Economy"),
  *     @OA\Property(property="number_of_seats", type="integer", example=2),
- *     @OA\Property(property="seat_number", type="array", @OA\Items(type="string"), example={"A1", "A2"}),
+ *     @OA\Property(property="seat_number", type="array", @OA\Items(type="string"), example={"A1", "A2"}, description="Array of selected seat numbers"),
  *     @OA\Property(property="total_fare", type="number", format="float", example=100.00),
  *     @OA\Property(property="status", type="string", example="pending"),
  *     @OA\Property(property="payment_method", type="string", example="online", enum={"cash", "online"}),
  *     @OA\Property(property="payment_name", type="string", example="Stripe", description="e.g., Cash, Stripe, PayPal"),
  *     @OA\Property(property="transaction_id", type="string", nullable=true, example="txn_123abc"),
+ *     @OA\Property(property="pnr_number", type="string", nullable=true, example="ABCDEF", description="PNR number generated for confirmed bookings"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-01-01T00:00:00.000000Z"),
+ *     @OA\Property(property="route", ref="#/components/schemas/BusRoute", description="Associated Route details (eager-loaded on specific booking view)"),
+ *     @OA\Property(property="vehicle", ref="#/components/schemas/Vehicle", description="Associated Vehicle details (eager-loaded on specific booking view)"),
+ *     @OA\Property(property="operator", ref="#/components/schemas/Operator", description="Associated Operator details (eager-loaded on specific booking view)"),
  * )
  *
  * @OA\Schema(
@@ -74,38 +78,34 @@ class BookingController extends Controller
      *     path="/bookings",
      *     tags={"Bookings"},
      *     summary="Create a new booking",
+     *     description="Creates a new booking. Admin/Operator bookings are auto-confirmed. Regular user bookings are confirmed for online payments, pending for cash payments. Includes seat validation to prevent overbooking.",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"from_station","to_station","journey_date","seat_type","number_of_seats","total_fare", "seat_number", "payment_method", "payment_name"},
-     *             @OA\Property(property="from_station", type="string", example="Station C"),
-     *             @OA\Property(property="to_station", type="string", example="Station D"),
+     *             @OA\Property(property="from_station", type="string", example="Dhaka"),
+     *             @OA\Property(property="to_station", type="string", example="Chittagong"),
      *             @OA\Property(property="journey_date", type="string", format="date", example="2025-12-30"),
-     *             @OA\Property(property="seat_type", type="string", example="Business"),
-     *             @OA\Property(property="number_of_seats", type="integer", example=1),
-     *             @OA\Property(property="total_fare", type="number", format="float", example=250.00),
-     *             @OA\Property(property="seat_number", type="array", @OA\Items(type="string"), example={"A1", "A2"}),
-     *             @OA\Property(property="payment_method", type="string", example="online", enum={"cash", "online"}),
-     *             @OA\Property(property="payment_name", type="string", example="Stripe", description="e.g., Cash, Stripe, PayPal"),
-     *             @OA\Property(property="transaction_id", type="string", nullable=true, example="txn_123abc", description="Required if payment_method is 'online'"),
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Booking created successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/Booking")
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *     )
-     * )
+     *             @OA\Property(property="seat_type", type="string", example="Economy"),
+     *             @OA\Property(property="number_of_seats", type="integer", example=1, description="Number of seats requested. Must match the count of 'seat_number' array."),
+ *             @OA\Property(property="total_fare", type="number", format="float", example=250.00),
+ *             @OA\Property(property="route_id", type="integer", example=1, description="ID of the route for the booking."),
+ *             @OA\Property(property="seat_number", type="array", @OA\Items(type="string"), example={"A1"}, description="Array of specific seat numbers to book. Must match 'number_of_seats' count and contain unique, available seats."),
+ *             @OA\Property(property="payment_method", type="string", example="online", enum={"cash", "online"}),
+ *             @OA\Property(property="payment_name", type="string", example="Stripe", description="e.g., Cash, Stripe, PayPal"),
+ *             @OA\Property(property="transaction_id", type="string", nullable=true, example="txn_123abc", description="Required if payment_method is 'online'"),
+ *         )
+ *     ),
+ *     @OA\Response(response=201, description="Booking created successfully", @OA\JsonContent(ref="#/components/schemas/Booking", @OA\Property(property="pnr_number", type="string", nullable=true, example="ABCDEF", description="PNR number if booking is confirmed instantly"))),
+ *     @OA\Response(response=422, description="Validation error or seat booking error", @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+ *             @OA\Property(property="errors", type="object", example={"seat_number": {"The seat number field is required."}}),
+ *             @OA\Property(property="custom_message", type="string", example="Not enough seats available for this route and date.", description="Custom error message for seat validation issues"),
+ *         )
+ *     ),
+ *     @OA\Response(response=401, description="Unauthenticated")
+ * )
      */
     public function store(Request $request)
     {
@@ -215,6 +215,7 @@ class BookingController extends Controller
      *     path="/bookings/{id}",
      *     tags={"Bookings"},
      *     summary="Get a specific booking by ID",
+     *     description="Retrieves a specific booking by ID, including associated PNR, Route, Vehicle, and Operator details.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -226,7 +227,13 @@ class BookingController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/Booking")
+     *         @OA\JsonContent(
+     *             ref="#/components/schemas/Booking",
+     *             @OA\Property(property="pnr", ref="#/components/schemas/Pnr", description="Associated PNR details"),
+     *             @OA\Property(property="route", ref="#/components/schemas/BusRoute", description="Associated Route details"),
+     *             @OA\Property(property="vehicle", ref="#/components/schemas/Vehicle", description="Associated Vehicle details"),
+     *             @OA\Property(property="operator", ref="#/components/schemas/Operator", description="Associated Operator details")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=403,
