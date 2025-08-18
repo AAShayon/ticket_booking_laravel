@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pnr;
 use Illuminate\Support\Str;
+use App\Models\Route;
 use OpenApi\Annotations as OA;
 
 /**
@@ -116,12 +117,57 @@ class BookingController extends Controller
             'number_of_seats' => 'required|integer|min:1',
             'total_fare' => 'required|numeric|min:0',
             'route_id' => 'required|exists:routes,id',
-            'seat_number' => 'nullable|array',
+            'seat_number' => 'required|array|min:1',
+            'seat_number.*' => 'string',
             'payment_method' => 'required|string|in:cash,online',
             'payment_name' => 'required|string',
             'transaction_id' => 'required_if:payment_method,online|nullable|string',
         ]);
 
+        // Validate number_of_seats matches count of seat_number array
+        if ($request->number_of_seats !== count($request->seat_number)) {
+            return response()->json(['message' => 'Number of seats must match the count of provided seat numbers.'], 422);
+        }
+
+        // Retrieve Route and Vehicle capacity
+        $route = Route::with('vehicle')->find($request->route_id);
+        if (!$route) {
+            return response()->json(['message' => 'Route not found.'], 404);
+        }
+
+        $vehicleCapacity = $route->vehicle->capacity;
+
+        // Calculate currently booked seats for this route and journey_date
+        $bookedSeatsSum = Booking::where('route_id', $request->route_id)
+            ->where('journey_date', $request->journey_date)
+            ->sum('number_of_seats');
+
+        // Check overall capacity
+        if (($bookedSeatsSum + $request->number_of_seats) > $vehicleCapacity) {
+            return response()->json(['message' => 'Not enough seats available for this route and date.'], 422);
+        }
+
+        // Check individual seat availability
+        $requestedSeats = $request->seat_number;
+        $alreadyBookedSeats = [];
+
+        $existingBookings = Booking::where('route_id', $request->route_id)
+            ->where('journey_date', $request->journey_date)
+            ->get();
+
+        foreach ($existingBookings as $booking) {
+            if (is_array($booking->seat_number)) {
+                $alreadyBookedSeats = array_merge($alreadyBookedSeats, $booking->seat_number);
+            }
+        }
+
+        $conflictingSeats = array_intersect($requestedSeats, $alreadyBookedSeats);
+
+        if (!empty($conflictingSeats)) {
+            return response()->json(['message' => 'The following seats are already taken: ' . implode(', ', $conflictingSeats)], 422);
+        }
+
+        // Proceed with booking creation
         $bookingData = array_merge($request->all(), ['user_id' => Auth::id(), 'route_id' => $request->route_id]);
 
         $userRole = Auth::user()->role;
@@ -197,8 +243,8 @@ class BookingController extends Controller
         if ($booking->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-        // Eager load the PNR relationship
-        $booking->load('pnr');
+        // Eager load the PNR, Route, Vehicle (through Route), and Operator (through Route) relationships
+        $booking->load('pnr', 'route.vehicle', 'route.operator');
         return response()->json($booking);
     }
 

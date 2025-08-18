@@ -124,6 +124,10 @@ class RouteController extends Controller
      */
     public function publicIndex(Request $request)
     {
+        $request->validate([
+            'journey_date' => 'nullable|date_format:Y-m-d',
+        ]);
+
         $query = \App\Models\Route::with('operator', 'vehicle');
 
         if ($request->has('origin')) {
@@ -152,7 +156,24 @@ class RouteController extends Controller
             $query->where('time_of_day', $request->input('time_of_day'));
         }
 
+        if ($request->has('journey_date')) {
+            $query->withSum(['bookings as booked_seats_sum' => function ($q) use ($request) {
+                $q->where('journey_date', $request->journey_date)
+                  ->whereColumn('bookings.route_id', 'routes.id'); // Ensure it's for the current route
+            }], 'number_of_seats');
+        }
+
         $routes = $query->get();
+
+        // Filter out routes with 0 or less available seats if journey_date is provided
+        if ($request->has('journey_date')) {
+            $routes = $routes->filter(function ($route) {
+                // Ensure booked_seats_sum is treated as 0 if not set (no bookings)
+                $bookedSeats = $route->booked_seats_sum ?? 0;
+                return ($route->vehicle->capacity - $bookedSeats) > 0;
+            })->values(); // Re-index the collection after filtering
+        }
+
         return \App\Http\Resources\RouteResource::collection($routes);
     }
 

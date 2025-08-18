@@ -43,4 +43,9 @@ class Booking extends Model
     {
         return $this->hasOne(Pnr::class);
     }
+
+    public function route()
+    {
+        return $this->belongsTo(Route::class);
+    }
 }

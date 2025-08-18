@@ -14,7 +14,7 @@ class RouteResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $data = [
             'route_id' => $this->id,
             'origin' => $this->origin,
             'destination' => $this->destination,
@@ -28,5 +28,14 @@ class RouteResource extends JsonResource
                 return $this->operator->name;
             }),
         ];
+
+        // Conditionally add available_seats if booked_seats_count is loaded
+        if (isset($this->booked_seats_sum) && $this->relationLoaded('vehicle')) {
+            $data['available_seats'] = $this->vehicle->capacity - $this->booked_seats_sum;
+            $data['vehicle_model'] = $this->vehicle->model_number;
+            $data['vehicle_type'] = $this->vehicle->type;
+        }
+
+        return $data;
     }
 }
