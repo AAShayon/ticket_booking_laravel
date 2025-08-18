@@ -84,8 +84,8 @@ class RouteController extends Controller
             $query->where('destination', 'like', '%' . $request->input('destination') . '%');
         }
 
-        if ($request->has('operator_id')) {
-            $query->where('operator_id', $request->input('operator_id'));
+        if (auth()->user()->role === 'operator') {
+            $query->where('operator_id', auth()->user()->operator->id);
         }
 
         if ($request->has('min_fare')) {
@@ -519,17 +519,41 @@ class RouteController extends Controller
             'destination' => 'required|string',
             'journey_date' => 'required|date_format:Y-m-d',
             'departure_time' => 'nullable|date_format:H:i:s',
+            'page' => 'nullable|integer|min:1',
+            'limit' => 'nullable|integer|min:1',
         ]);
 
-        $routes = Route::with('vehicle')
+        $query = Route::with('vehicle')
             ->where('origin', $request->origin)
             ->where('destination', $request->destination)
-            ->withCount(['bookings as booked_seats' => function ($query) use ($request) {
-                $query->where('journey_date', $request->journey_date);
-            }])
-            ->get();
+            ->withCount(['bookings as booked_seats' => function ($q) use ($request) {
+                $q->where('journey_date', $request->journey_date);
+            }]);
 
-        $results = $routes->map(function ($route) {
+        if ($request->has('time_of_day')) {
+            $query->where('time_of_day', $request->time_of_day);
+        }
+
+        if ($request->has('minFare')) {
+            $query->where('fare_per_seat', '>=', $request->minFare);
+        }
+
+        if ($request->has('maxFare')) {
+            $query->where('fare_per_seat', '<=', $request->maxFare);
+        }
+
+        if ($request->has('type')) {
+            $query->whereHas('vehicle', function ($q) use ($request) {
+                $q->where('type', $request->type);
+            });
+        }
+
+        // Apply pagination
+        $limit = $request->input('limit', 15);
+        $routes = $query->paginate($limit);
+
+        // Map and filter results for available seats
+        $routes->getCollection()->transform(function ($route) {
             $availableSeats = $route->vehicle->capacity - $route->booked_seats;
             if ($availableSeats > 0) {
                 return [
@@ -543,14 +567,92 @@ class RouteController extends Controller
                     'vehicle_number' => $route->vehicle_number,
                     'time_of_day' => $route->time_of_day,
                     'departure_time' => $route->departure_time,
+                    'vehicle_id' => $route->vehicle_id,
                     'available_seats' => $availableSeats,
                     'vehicle_model' => $route->vehicle->model_number,
                     'vehicle_type' => $route->vehicle->type,
+                    'vehicle_image' => $route->vehicle->image,
+                    'operator_name' => $route->operator->name,
                 ];
             }
             return null;
         })->filter();
 
-        return response()->json($results);
+        return response()->json($routes);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/routes/{route}/seat-map",
+     *     tags={"Routes"},
+     *     summary="Get seat map for a specific route and journey date",
+     *     security={{ "bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="route",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the route"
+     *     ),
+     *     @OA\Parameter(
+     *         name="journey_date",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="string", format="date", example="2025-08-20"),
+     *         description="Date of journey (YYYY-MM-DD)"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="total_capacity", type="integer", example=40),
+     *             @OA\Property(property="booked_seats_count", type="integer", example=5),
+     *             @OA\Property(property="available_seats_count", type="integer", example=35),
+     *             @OA\Property(property="seat_map", type="object", description="Key-value pairs of seat number and status (booked/available)",
+     *                 example={"A1": "booked", "A2": "available", "B1": "booked"})
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Route not found",
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *     )
+     * )
+     */
+    public function getSeatMap(Request $request, Route $route)
+    {
+        $request->validate([
+            'journey_date' => 'required|date_format:Y-m-d',
+        ]);
+
+        $journeyDate = $request->journey_date;
+        $totalCapacity = $route->vehicle->capacity;
+
+        $bookedSeats = Booking::where('route_id', $route->id)
+            ->where('journey_date', $journeyDate)
+            ->pluck('seat_number')
+            ->flatten()
+            ->toArray();
+
+        $seatMap = [];
+        // Assuming a simple seat numbering S1, S2, ...
+        // This can be made more sophisticated if actual seat layouts are needed.
+        for ($i = 1; $i <= $totalCapacity; $i++) {
+            $seatNumber = 'S' . $i; // Simple seat numbering
+            $seatMap[$seatNumber] = in_array($seatNumber, $bookedSeats) ? 'booked' : 'available';
+        }
+
+        $bookedSeatsCount = count($bookedSeats);
+        $availableSeatsCount = $totalCapacity - $bookedSeatsCount;
+
+        return response()->json([
+            'total_capacity' => $totalCapacity,
+            'booked_seats_count' => $bookedSeatsCount,
+            'available_seats_count' => $availableSeatsCount,
+            'seat_map' => $seatMap,
+        ]);
     }
 }

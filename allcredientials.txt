@@ -1,0 +1,15 @@
+Admin:
+  Email: superadmin@example.com
+  Password: password
+
+Operator 1:
+  Email: operator1@example.com
+  Password: password
+
+Operator 2:
+  Email: operator2@example.com
+  Password: password
+
+Regular User:
+  Email: user@example.com
+  Password: password

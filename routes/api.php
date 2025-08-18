@@ -51,6 +51,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/routes/search', [RouteController::class, 'search']);
 
+    Route::get('/routes/{route}/seat-map', [RouteController::class, 'getSeatMap']);
+
     Route::post('/payments/initiate/{booking}', [PaymentController::class, 'initiatePayment']);
 
     Route::post('/profile', [App\Http\Controllers\Api\ProfileController::class, 'update']);
@@ -59,8 +61,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/operator-requests', [OperatorRequestController::class, 'store']);
     Route::get('/operator-requests/my', [OperatorRequestController::class, 'userRequests']);
 
-    // Operator Routes
-    Route::middleware(['role:operator'])->group(function () {
+    // Operator & Admin Routes
+    Route::middleware(['role:operator,admin'])->group(function () {
         Route::apiResource('/routes', RouteController::class);
     });
 
@@ -80,8 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Operator Management
         Route::apiResource('/operators', OperatorController::class);
 
-        // Route Management
-        Route::apiResource('/routes', RouteController::class);
+        
 
         // Operator Request Management
         Route::get('/admin/operator-requests', [OperatorRequestController::class, 'index']);

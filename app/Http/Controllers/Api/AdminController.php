@@ -183,7 +183,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|string|in:user,admin',
+            'role' => 'required|string|in:user,admin,operator',
             'phone_number' => 'nullable|string|max:20',
         ]);
 

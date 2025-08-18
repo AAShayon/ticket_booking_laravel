@@ -121,7 +121,6 @@ class BookingController extends Controller
             'seat_number.*' => 'string',
             'payment_method' => 'required|string|in:cash,online',
             'payment_name' => 'required|string',
-            'transaction_id' => 'required_if:payment_method,online|nullable|string',
         ]);
 
         // Validate number_of_seats matches count of seat_number array
@@ -133,6 +132,12 @@ class BookingController extends Controller
         $route = Route::with('vehicle')->find($request->route_id);
         if (!$route) {
             return response()->json(['message' => 'Route not found.'], 404);
+        }
+
+        // Security check: Verify total_fare
+        $expectedTotalFare = $route->fare_per_seat * $request->number_of_seats;
+        if ($request->total_fare != $expectedTotalFare) {
+            return response()->json(['message' => 'Invalid total fare. Please ensure the fare calculation is correct.'], 422);
         }
 
         $vehicleCapacity = $route->vehicle->capacity;
@@ -169,6 +174,11 @@ class BookingController extends Controller
 
         // Proceed with booking creation
         $bookingData = array_merge($request->all(), ['user_id' => Auth::id(), 'route_id' => $request->route_id]);
+
+        // Generate transaction_id if payment_method is online and not provided
+        if ($request->payment_method === 'online' && empty($request->transaction_id)) {
+            $bookingData['transaction_id'] = 'TRX_' . Str::random(10);
+        }
 
         $userRole = Auth::user()->role;
 
