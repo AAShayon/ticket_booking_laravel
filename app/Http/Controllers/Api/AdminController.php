@@ -332,7 +332,7 @@ class AdminController extends Controller
     public function getAllBookings(Request $request)
     {
         $limit = $request->input('limit', 15);
-        $bookings = Booking::with('user')->paginate($limit);
+        $bookings = Booking::paginate($limit);
         return response()->json($bookings);
     }
 
