@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Pnr;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -332,7 +334,20 @@ class AdminController extends Controller
     public function getAllBookings(Request $request)
     {
         $limit = $request->input('limit', 15);
-        $bookings = Booking::paginate($limit);
+        $bookings = Booking::with('pnr')->paginate($limit);
+
+        // Map the bookings to include pnr_number directly and remove the nested pnr object
+        $bookings->getCollection()->transform(function ($booking) {
+            $bookingArray = $booking->toArray();
+            if ($booking->pnr) {
+                $bookingArray['pnr_number'] = $booking->pnr->pnr_number;
+            } else {
+                $bookingArray['pnr_number'] = null; // Or an empty string, depending on preference
+            }
+            unset($bookingArray['pnr']); // Remove the nested pnr object
+            return $bookingArray;
+        });
+
         return response()->json($bookings);
     }
 
@@ -382,9 +397,35 @@ class AdminController extends Controller
             'status' => 'required|string|in:pending,confirmed,cancelled',
         ]);
 
-        $booking->update(['status' => $request->status]);
+        $oldStatus = $booking->status;
+        $newStatus = $request->status;
+
+        // If a pending cash booking is being confirmed, generate PNR
+        if ($oldStatus === 'pending' && $newStatus === 'confirmed' && $booking->payment_method === 'cash') {
+            $pnrNumber = $this->generatePnrNumber();
+            $booking->pnr()->create(['pnr_number' => $pnrNumber]);
+        }
+
+        $booking->update(['status' => $newStatus]);
+
+        // Eager load the PNR relationship before returning
+        $booking->load('pnr');
 
         return response()->json($booking);
+    }
+
+    /**
+     * Generate a unique PNR number.
+     *
+     * @return string
+     */
+    private function generatePnrNumber()
+    {
+        do {
+            $pnr = strtoupper(Str::random(6)); // Generate a 6-character alphanumeric string
+        } while (Pnr::where('pnr_number', $pnr)->exists());
+
+        return $pnr;
     }
 
     /**

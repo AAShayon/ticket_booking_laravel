@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Pnr;
+use Illuminate\Support\Str;
 use OpenApi\Annotations as OA;
 
 /**
@@ -120,9 +122,46 @@ class BookingController extends Controller
             'transaction_id' => 'required_if:payment_method,online|nullable|string',
         ]);
 
-        $booking = Auth::user()->bookings()->create(array_merge($request->all(), ['status' => 'pending', 'route_id' => $request->route_id]));
+        $bookingData = array_merge($request->all(), ['user_id' => Auth::id(), 'route_id' => $request->route_id]);
 
-        return response()->json($booking, 201);
+        $userRole = Auth::user()->role;
+
+        if ($userRole === 'admin' || $userRole === 'operator') {
+            $bookingData['status'] = 'confirmed';
+        } elseif ($request->payment_method === 'online') {
+            $bookingData['status'] = 'confirmed';
+        } else {
+            $bookingData['status'] = 'pending';
+        }
+
+        $booking = Booking::create($bookingData);
+
+        $pnrNumber = null;
+        if ($booking->status === 'confirmed') {
+            $pnrNumber = $this->generatePnrNumber();
+            $booking->pnr()->create(['pnr_number' => $pnrNumber]);
+        }
+
+        $response = $booking->toArray();
+        if ($pnrNumber) {
+            $response['pnr_number'] = $pnrNumber;
+        }
+
+        return response()->json($response, 201);
+    }
+
+    /**
+     * Generate a unique PNR number.
+     *
+     * @return string
+     */
+    private function generatePnrNumber()
+    {
+        do {
+            $pnr = strtoupper(Str::random(6)); // Generate a 6-character alphanumeric string
+        } while (Pnr::where('pnr_number', $pnr)->exists());
+
+        return $pnr;
     }
 
     /**
@@ -158,6 +197,8 @@ class BookingController extends Controller
         if ($booking->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+        // Eager load the PNR relationship
+        $booking->load('pnr');
         return response()->json($booking);
     }
 
