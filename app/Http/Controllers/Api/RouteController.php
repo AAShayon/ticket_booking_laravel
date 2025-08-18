@@ -122,9 +122,37 @@ class RouteController extends Controller
      *     )
      * )
      */
-    public function publicIndex()
+    public function publicIndex(Request $request)
     {
-        $routes = \App\Models\Route::with('operator', 'vehicle')->get();
+        $query = \App\Models\Route::with('operator', 'vehicle');
+
+        if ($request->has('origin')) {
+            $query->where('origin', 'like', '%' . $request->input('origin') . '%');
+        }
+
+        if ($request->has('destination')) {
+            $query->where('destination', 'like', '%' . $request->input('destination') . '%');
+        }
+
+        if ($request->has('minFare')) {
+            $query->where('fare_per_seat', '>=', $request->input('minFare'));
+        }
+
+        if ($request->has('maxFare')) {
+            $query->where('fare_per_seat', '<=', $request->input('maxFare'));
+        }
+
+        if ($request->has('type')) {
+            $query->whereHas('vehicle', function ($q) use ($request) {
+                $q->where('type', $request->input('type'));
+            });
+        }
+
+        if ($request->has('time_of_day')) {
+            $query->where('time_of_day', $request->input('time_of_day'));
+        }
+
+        $routes = $query->get();
         return \App\Http\Resources\RouteResource::collection($routes);
     }
 
