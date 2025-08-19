@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/payments/initiate/{booking}', [PaymentController::class, 'initiatePayment']);
 
     Route::post('/profile', [App\Http\Controllers\Api\ProfileController::class, 'update']);
+    Route::get('/users/{id}', [App\Http\Controllers\Api\ProfileController::class, 'showUserById']);
 
     // Operator Requests (User can submit and view their own)
     Route::post('/operator-requests', [OperatorRequestController::class, 'store']);
