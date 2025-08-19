@@ -19,6 +19,7 @@ class RouteResource extends JsonResource
             'origin' => $this->origin,
             'destination' => $this->destination,
             'fare_per_seat' => $this->fare_per_seat,
+            
             'departure_time' => $this->departure_time,
             'estimated_travel_time' => $this->estimated_travel_time,
             'vehicle_number' => $this->vehicle_number,

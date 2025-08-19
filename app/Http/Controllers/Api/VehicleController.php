@@ -127,7 +127,7 @@ class VehicleController extends Controller
      *         @OA\JsonContent(
      *             required={"model_number","type"},
      *             @OA\Property(property="model_number", type="string", example="Scania K360"),
-     *             @OA\Property(property="type", type="string", enum={"AC", "Sleeper", "Non-AC", "hyundai", "scania"}, example="AC"),
+     *             @OA\Property(property="type", type="string", enum={"ac", "sleeper", "non-ac", "hyundai", "scania", "volvo"}, example="ac"),
      *             @OA\Property(property="capacity", type="integer", example=40),
      *             @OA\Property(property="image", type="string", format="binary", description="Vehicle image file"),
      *         )
@@ -154,10 +154,12 @@ class VehicleController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge(['type' => strtolower($request->input('type'))]);
+
         $request->validate([
             'operator_id' => 'required|exists:operators,id',
             'model_number' => 'required|string|max:255',
-            'type' => 'required|string|in:AC,Sleeper,Non-AC,hyundai,scania',
+            'type' => 'required|string|in:ac,sleeper,non-ac,hyundai,scania,volvo',
             'capacity' => 'required|integer|min:1',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
@@ -251,7 +253,7 @@ class VehicleController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="model_number", type="string", example="Volvo 9700"),
-     *             @OA\Property(property="type", type="string", enum={"AC", "Sleeper", "Non-AC", "hyundai", "scania"}, example="Sleeper"),
+     *             @OA\Property(property="type", type="string", enum={"ac", "sleeper", "non-ac", "hyundai", "scania", "volvo"}, example="sleeper"),
      *             @OA\Property(property="capacity", type="integer", example=28),
      *             @OA\Property(property="image", type="string", format="binary", description="Vehicle image file"),
      *         )
@@ -282,9 +284,13 @@ class VehicleController extends Controller
      */
     public function update(Request $request, Vehicle $vehicle)
     {
+        if ($request->has('type')) {
+            $request->merge(['type' => strtolower($request->input('type'))]);
+        }
+
         $request->validate([
             'model_number' => 'sometimes|required|string|max:255',
-            'type' => 'sometimes|required|string|in:AC,Sleeper,Non-AC,hyundai,scania',
+            'type' => 'sometimes|required|string|in:ac,sleeper,non-ac,hyundai,scania,volvo',
             'capacity' => 'sometimes|required|integer|min:1',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);

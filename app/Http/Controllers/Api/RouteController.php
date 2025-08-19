@@ -151,7 +151,7 @@ class RouteController extends Controller
      *         name="type",
      *         in="query",
      *         required=false,
-     *         @OA\Schema(type="string", enum={"AC", "non-AC", "sleeper", "hyundai"}),
+     *         @OA\Schema(type="string", enum={"ac", "non-ac", "sleeper", "hyundai", "scania", "volvo"}),
      *         description="Vehicle type",
      *     ),
      *     @OA\Parameter(
@@ -208,7 +208,7 @@ class RouteController extends Controller
 
         if ($request->has('type')) {
             $query->whereHas('vehicle', function ($q) use ($request) {
-                $q->where('type', $request->input('type'));
+                $q->where('type', strtolower($request->input('type')));
             });
         }
 
@@ -293,10 +293,7 @@ class RouteController extends Controller
             'departure_time' => 'required|date_format:H:i:s',
         ]);
 
-        $vehicle = \App\Models\Vehicle::find($request->vehicle_id);
-        $calculatedFare = $request->fare_per_seat * $vehicle->capacity;
-
-        $route = Route::create(array_merge($request->all(), ['fare' => $calculatedFare]));
+        $route = Route::create($request->all());
 
         return response()->json($route, 201);
     }
@@ -401,14 +398,7 @@ class RouteController extends Controller
             'departure_time' => 'sometimes|required|date_format:H:i:s',
         ]);
 
-        $data = $request->all();
-
-        if ($request->has('fare_per_seat') && $request->has('vehicle_id')) {
-            $vehicle = \App\Models\Vehicle::find($request->vehicle_id);
-            $data['fare'] = $request->fare_per_seat * $vehicle->capacity;
-        }
-
-        $route->update($data);
+        $route->update($request->all());
 
         return response()->json($route);
     }
@@ -446,6 +436,13 @@ class RouteController extends Controller
      */
     public function destroy(Route $route)
     {
+        // Check if there are any associated bookings for this route
+        if ($route->bookings()->exists()) {
+            return response()->json([
+                'message' => 'Cannot delete route with existing bookings. Please delete associated bookings first.'
+            ], 409); // 409 Conflict
+        }
+
         $route->delete();
         return response()->json(null, 204);
     }
@@ -544,7 +541,7 @@ class RouteController extends Controller
 
         if ($request->has('type')) {
             $query->whereHas('vehicle', function ($q) use ($request) {
-                $q->where('type', $request->type);
+                $q->where('type', strtolower($request->input('type')));
             });
         }
 
@@ -557,7 +554,7 @@ class RouteController extends Controller
             $availableSeats = $route->vehicle->capacity - $route->booked_seats;
             if ($availableSeats > 0) {
                 return [
-                    'id' => $route->id,
+                    'route_id' => $route->id,
                     'operator_id' => $route->operator_id,
                     'origin' => $route->origin,
                     'destination' => $route->destination,
@@ -652,6 +649,7 @@ class RouteController extends Controller
             'total_capacity' => $totalCapacity,
             'booked_seats_count' => $bookedSeatsCount,
             'available_seats_count' => $availableSeatsCount,
+            'vehicle_type' => $route->vehicle->type,
             'seat_map' => $seatMap,
         ]);
     }

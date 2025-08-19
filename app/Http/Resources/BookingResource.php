@@ -29,6 +29,7 @@ class BookingResource extends JsonResource
             'user' => new UserResource($this->whenLoaded('user')),
             'payment' => new PaymentResource($this->whenLoaded('payment')),
             'pnr' => $this->whenLoaded('pnr'),
+            'route_id' => $this->whenLoaded('route', fn () => $this->route->id),
         ];
     }
 }

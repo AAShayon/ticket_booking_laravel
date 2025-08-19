@@ -123,14 +123,14 @@ class FullApiTest extends TestCase
         $response = $this->actingAs($this->operatorUser, 'sanctum')->postJson('/api/vehicles', [
             'operator_id' => $operator->id,
             'model_number' => 'MN-123',
-            'type' => 'AC',
+            'type' => 'ac',
             'capacity' => 50
         ]);
         $response->assertStatus(201);
 
         // Update the vehicle
         $response = $this->actingAs($this->operatorUser, 'sanctum')->putJson('/api/vehicles/' . $vehicle->id, [
-            'type' => 'Non-AC',
+            'type' => 'non-ac',
         ]);
         $response->assertStatus(200);
 

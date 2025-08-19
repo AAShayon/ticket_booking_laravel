@@ -134,10 +134,13 @@ class BookingController extends Controller
             return response()->json(['message' => 'Route not found.'], 404);
         }
 
-        // Security check: Verify total_fare
-        $expectedTotalFare = $route->fare_per_seat * $request->number_of_seats;
-        if ($request->total_fare != $expectedTotalFare) {
-            return response()->json(['message' => 'Invalid total fare. Please ensure the fare calculation is correct.'], 422);
+        // Security check: Verify total_fare for regular users
+        $userRole = Auth::user()->role;
+        if ($userRole === 'user') {
+            $expectedTotalFare = $route->fare_per_seat * $request->number_of_seats;
+            if ($request->total_fare != $expectedTotalFare) {
+                return response()->json(['message' => 'Invalid total fare. Please ensure the fare calculation is correct.'], 422);
+            }
         }
 
         $vehicleCapacity = $route->vehicle->capacity;
