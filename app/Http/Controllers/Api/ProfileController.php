@@ -91,43 +91,4 @@ class ProfileController extends Controller
             'user' => $user,
         ]);
     }
-
-    /**
-     * @OA\Get(
-     *     path="/users/{id}",
-     *     tags={"Profile"},
-     *     summary="Get user details by ID",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer"),
-     *         description="ID of the user to retrieve"
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/AdminUser")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="User not found",
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *     )
-     * )
-     */
-    public function showUserById($id)
-    {
-        $user = \App\Models\User::find($id);
-
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        return response()->json($user);
-    }
 }
