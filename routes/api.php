@@ -37,7 +37,7 @@ Route::post('/payments/cancel', [PaymentController::class, 'paymentCancel']);
 Route::post('/payments/ipn', [PaymentController::class, 'ipn']);
 
 Route::get('/operators/public', [OperatorController::class, 'publicIndex']);
-Route::get('/routes/public', [RouteController::class, 'publicIndex']);
+
 
 
 

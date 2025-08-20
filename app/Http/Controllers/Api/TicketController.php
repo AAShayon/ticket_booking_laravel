@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Pnr;
+use Carbon\Carbon;
 
 class TicketController extends Controller
 {
@@ -22,7 +23,9 @@ class TicketController extends Controller
             return response()->json(['message' => 'Ticket not found.'], 404);
         }
 
-        $booking = Booking::where('id', $pnr->booking_id)
+        // Load the user relationship and route relationship
+        $booking = Booking::with('user', 'route') // Load user and route
+            ->where('id', $pnr->booking_id)
             ->where('journey_date', $request->journey_date)
             ->first();
 
@@ -34,6 +37,23 @@ class TicketController extends Controller
             return response()->json(['message' => 'You are not authorized to view this ticket.'], 403);
         }
 
-        return response()->json($booking);
+        $bookingArray = $booking->toArray();
+
+        // Add user_name
+        $bookingArray['user_name'] = $booking->user->name;
+        unset($bookingArray['user']); // Remove the full user object
+
+        // Format departure time and add to response
+        if ($booking->route && $booking->route->departure_time) {
+            $departureTime = Carbon::parse($booking->route->departure_time);
+            $bookingArray['formatted_departure_time'] = $departureTime->format('h:i A'); // e.g., 07:00 PM
+        } else {
+            $bookingArray['formatted_departure_time'] = null;
+        }
+
+        // Remove the full route object
+        unset($bookingArray['route']);
+
+        return response()->json($bookingArray);
     }
 }

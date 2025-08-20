@@ -67,9 +67,10 @@ class BookingController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $bookings = Auth::user()->bookings()->get();
+        $limit = $request->input('limit', 10);
+        $bookings = Auth::user()->bookings()->paginate($limit);
         return response()->json($bookings);
     }
 
