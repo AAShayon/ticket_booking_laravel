@@ -30,6 +30,10 @@ class TicketController extends Controller
             return response()->json(['message' => 'Ticket not found for the given date.'], 404);
         }
 
+        if ($booking->user_id !== auth()->id()) {
+            return response()->json(['message' => 'You are not authorized to view this ticket.'], 403);
+        }
+
         return response()->json($booking);
     }
 }

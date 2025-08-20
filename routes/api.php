@@ -39,9 +39,10 @@ Route::post('/payments/ipn', [PaymentController::class, 'ipn']);
 Route::get('/operators/public', [OperatorController::class, 'publicIndex']);
 Route::get('/routes/public', [RouteController::class, 'publicIndex']);
 
-Route::post('/ticket/check', [App\Http\Controllers\Api\TicketController::class, 'check']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/ticket/check', [App\Http\Controllers\Api\TicketController::class, 'check']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user();
