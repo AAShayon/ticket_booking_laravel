@@ -7,9 +7,45 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Pnr;
 use Carbon\Carbon;
+use OpenApi\Annotations as OA;
 
+/**
+ * @OA\Tag(
+ *      name="Tickets",
+ *      description="API Endpoints for Ticket Management"
+ * )
+ */
 class TicketController extends Controller
 {
+    /**
+     * @OA\Post(
+     *     path="/ticket/check",
+     *     tags={"Tickets"},
+     *     summary="Check ticket details by PNR",
+     *      security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"pnr_number", "journey_date"},
+     *             @OA\Property(property="pnr_number", type="string", example="ABCDEF"),
+     *             @OA\Property(property="journey_date", type="string", format="date", example="2025-12-25"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Ticket details",
+     *         @OA\JsonContent(ref="#/components/schemas/Booking")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Ticket not found"
+     *     ),
+     *      @OA\Response(
+     *         response=403,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
     public function check(Request $request)
     {
         $request->validate([

@@ -14,7 +14,7 @@
     },
     "servers": [
         {
-            "url": "http://my-default-host.com",
+            "url": "http://172.168.0.132:8000",
             "description": "Ticket Booking System API Server"
         }
     ],
@@ -2807,10 +2807,12 @@
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "AC",
-                                "non-AC",
+                                "ac",
+                                "non-ac",
                                 "sleeper",
-                                "hyundai"
+                                "hyundai",
+                                "scania",
+                                "volvo"
                             ]
                         }
                     },
@@ -3181,6 +3183,140 @@
                 }
             }
         },
+        "/routes/{route}/seat-map": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get seat map for a specific route and journey date",
+                "operationId": "3373b29b6e50d732fa35d2679dfbbd4d",
+                "parameters": [
+                    {
+                        "name": "route",
+                        "in": "path",
+                        "description": "ID of the route",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "journey_date",
+                        "in": "query",
+                        "description": "Date of journey (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-08-20"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_capacity": {
+                                            "type": "integer",
+                                            "example": 40
+                                        },
+                                        "booked_seats_count": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "available_seats_count": {
+                                            "type": "integer",
+                                            "example": 35
+                                        },
+                                        "seat_map": {
+                                            "description": "Key-value pairs of seat number and status (booked/available)",
+                                            "type": "object",
+                                            "example": {
+                                                "A1": "booked",
+                                                "A2": "available",
+                                                "B1": "booked"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ticket/check": {
+            "post": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Check ticket details by PNR",
+                "operationId": "a577d64512c6189782409ae4c227eb97",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "pnr_number",
+                                    "journey_date"
+                                ],
+                                "properties": {
+                                    "pnr_number": {
+                                        "type": "string",
+                                        "example": "ABCDEF"
+                                    },
+                                    "journey_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-25"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ticket details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Booking"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ticket not found"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/vehicles": {
             "get": {
                 "tags": [
@@ -3235,13 +3371,14 @@
                                     "type": {
                                         "type": "string",
                                         "enum": [
-                                            "AC",
-                                            "Sleeper",
-                                            "Non-AC",
+                                            "ac",
+                                            "sleeper",
+                                            "non-ac",
                                             "hyundai",
-                                            "scania"
+                                            "scania",
+                                            "volvo"
                                         ],
-                                        "example": "AC"
+                                        "example": "ac"
                                     },
                                     "capacity": {
                                         "type": "integer",
@@ -3400,13 +3537,14 @@
                                     "type": {
                                         "type": "string",
                                         "enum": [
-                                            "AC",
-                                            "Sleeper",
-                                            "Non-AC",
+                                            "ac",
+                                            "sleeper",
+                                            "non-ac",
                                             "hyundai",
-                                            "scania"
+                                            "scania",
+                                            "volvo"
                                         ],
-                                        "example": "Sleeper"
+                                        "example": "sleeper"
                                     },
                                     "capacity": {
                                         "type": "integer",
@@ -4179,6 +4317,10 @@
         {
             "name": "Routes",
             "description": "API Endpoints for Bus Route Management (Admin Only)"
+        },
+        {
+            "name": "Tickets",
+            "description": "API Endpoints for Ticket Management"
         },
         {
             "name": "Vehicles",
