@@ -1,0 +1,4 @@
+INSERT INTO `users` (`name`, `email`, `phone_number`, `email_verified_at`, `password`, `profile_image`, `role`, `last_login_at`, `remember_token`, `created_at`, `updated_at`) VALUES 
+('Super Admin', 'admin@ansteches.shop', '+8801580873412', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, 'admin', NOW(), NULL, NOW(), NOW()),
+('Test Operator', 'operator@ansteches.shop', '+8801987654321', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, 'operator', NOW(), NULL, NOW(), NOW()),
+('Test User', 'user@ansteches.shop', '+8801555666777', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, 'user', NOW(), NULL, NOW(), NOW());

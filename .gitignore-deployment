@@ -1,0 +1,21 @@
+# Deployment temporary files (exclude from git)
+debug*.php
+test*.php
+test*.html
+clear-cache.php
+server-debug.php
+database-diagnostic.php
+login-diagnostic.php
+setup-database.php
+quick-test.php
+
+# Temporary zip files
+*.zip
+
+# Environment files with credentials
+CLEAN-env-file.txt
+CORRECTED-env-file.txt
+
+# Diagnostic SQL files (sensitive)
+add-admin-users.sql
+fix-user-passwords.sql
