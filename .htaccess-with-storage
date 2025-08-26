@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Handle storage file requests (for images, uploads, etc.)
+    RewriteCond %{REQUEST_URI} ^/storage/(.+)$
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^storage/(.*)$ storage-serve.php?file=$1 [L,QSA]
+    
+    # Handle requests to the root directory
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteCond %{REQUEST_URI} !^/storage/
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
+    
+    # Handle direct access to public directory
+    RewriteCond %{REQUEST_URI} ^/public/
+    RewriteRule ^public/(.*)$ public/$1 [L,QSA]
+</IfModule>
