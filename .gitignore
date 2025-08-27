@@ -1,0 +1,58 @@
+# Laravel specific
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Deployment packages
+*.zip
+*.tar.gz
+
+# Development tools - exclude from production
+clear-cache.php
+storage-fix.php
+verify.php
+db-diagnostic.php
+index.php
+QUICK-ACCESS-GUIDE.md
+DEPLOYMENT-NO-TERMINAL.md
+
+# Cache and sessions
+bootstrap/cache/*
+!bootstrap/cache/.gitignore
+storage/framework/cache/*
+!storage/framework/cache/.gitignore
+storage/framework/sessions/*
+!storage/framework/sessions/.gitignore
+storage/framework/views/*
+!storage/framework/views/.gitignore
+storage/logs/*
+!storage/logs/.gitignore
