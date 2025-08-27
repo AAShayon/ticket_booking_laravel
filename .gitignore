@@ -42,8 +42,6 @@ storage-fix.php
 verify.php
 db-diagnostic.php
 index.php
-QUICK-ACCESS-GUIDE.md
-DEPLOYMENT-NO-TERMINAL.md
 
 # Cache and sessions
 bootstrap/cache/*
