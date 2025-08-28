@@ -59,8 +59,8 @@ class TicketController extends Controller
             return response()->json(['message' => 'Ticket not found.'], 404);
         }
 
-        // Load the user relationship and route relationship
-        $booking = Booking::with('user', 'route') // Load user and route
+        // Load the booking with user and route relationships
+        $booking = Booking::with('user', 'route')
             ->where('id', $pnr->booking_id)
             ->where('journey_date', $request->journey_date)
             ->first();
@@ -69,8 +69,16 @@ class TicketController extends Controller
             return response()->json(['message' => 'Ticket not found for the given date.'], 404);
         }
 
-        if ($booking->user_id !== auth()->id()) {
-            return response()->json(['message' => 'You are not authorized to view this ticket.'], 403);
+        // Debug information
+        $authUserId = auth()->id();
+        $bookingUserId = $booking->user_id;
+        
+        // Check if the authenticated user owns this booking
+        // Explicitly cast both values to integers for comparison
+        if ((int)$bookingUserId !== (int)$authUserId) {
+            return response()->json([
+                'message' => 'You are not authorized to view this ticket.'
+            ], 403);
         }
 
         $bookingArray = $booking->toArray();

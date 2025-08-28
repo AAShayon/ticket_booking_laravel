@@ -157,7 +157,7 @@ class OperatorController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'vehicles' => 'required|array|min:1',
             'vehicles.*.model_number' => 'required|string|max:255',
-            'vehicles.*.type' => 'required|string|in:AC,non-AC,sleeper,hyundai,scania',
+            'vehicles.*.type' => 'required|string|in:ac,non-ac,sleeper,hyundai,scania',
             'vehicles.*.capacity' => 'required|integer|min:1',
         ]);
 
@@ -269,29 +269,68 @@ class OperatorController extends Controller
      */
     public function update(Request $request, Operator $operator)
     {
-        $request->validate([
-            'name' => 'sometimes|required|string|unique:operators,name,' . $operator->id,
-            'contact_email' => 'nullable|email',
-            'contact_phone' => 'nullable|string',
-            'admin_commission_percentage' => 'nullable|numeric|min:0|max:100',
-            'user_id' => 'nullable|exists:users,id',
-            'nid' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'transport_business_license' => 'nullable|string|max:255',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+        try {
+            // Validate the request
+            $request->validate([
+                'name' => 'sometimes|string|unique:operators,name,' . $operator->id,
+                'contact_email' => 'nullable|email',
+                'contact_phone' => 'nullable|string',
+                'admin_commission_percentage' => 'nullable|numeric|min:0|max:100',
+                'user_id' => 'nullable|exists:users,id',
+                'nid' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'transport_business_license' => 'nullable|string|max:255',
+                'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
 
-        $data = $request->all();
-        if ($request->hasFile('logo')) {
-            if ($operator->logo) {
-                Storage::disk('public')->delete($operator->logo);
+            // Use request input method which works for both JSON and form-data
+            // including form-data with method spoofing
+            $updateData = [];
+            
+            if ($request->filled('name')) {
+                $updateData['name'] = $request->input('name');
             }
-            $data['logo'] = $request->file('logo')->store('logos', 'public');
+            if ($request->filled('contact_email')) {
+                $updateData['contact_email'] = $request->input('contact_email');
+            }
+            if ($request->filled('contact_phone')) {
+                $updateData['contact_phone'] = $request->input('contact_phone');
+            }
+            if ($request->filled('admin_commission_percentage')) {
+                $updateData['admin_commission_percentage'] = $request->input('admin_commission_percentage');
+            }
+            if ($request->filled('user_id')) {
+                $updateData['user_id'] = $request->input('user_id');
+            }
+            if ($request->filled('nid')) {
+                $updateData['nid'] = $request->input('nid');
+            }
+            if ($request->filled('address')) {
+                $updateData['address'] = $request->input('address');
+            }
+            if ($request->filled('transport_business_license')) {
+                $updateData['transport_business_license'] = $request->input('transport_business_license');
+            }
+
+            // Handle logo upload
+            if ($request->hasFile('logo')) {
+                // Delete old logo if exists
+                if ($operator->logo) {
+                    Storage::disk('public')->delete($operator->logo);
+                }
+                // Store new logo
+                $updateData['logo'] = $request->file('logo')->store('logos', 'public');
+            }
+
+            // Update the operator
+            if (!empty($updateData)) {
+                $operator->update($updateData);
+            }
+
+            return response()->json($operator);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server Error', 'error' => $e->getMessage()], 500);
         }
-
-        $operator->update($data);
-
-        return response()->json($operator);
     }
 
     /**
@@ -327,6 +366,11 @@ class OperatorController extends Controller
      */
     public function destroy(Operator $operator)
     {
+        // Delete logo if exists
+        if ($operator->logo) {
+            Storage::disk('public')->delete($operator->logo);
+        }
+        
         $operator->delete();
         return response()->json(null, 204);
     }

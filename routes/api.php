@@ -85,8 +85,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // Operator Management
         Route::apiResource('/operators', OperatorController::class);
 
-        
-
         // Operator Request Management
         Route::get('/admin/operator-requests', [OperatorRequestController::class, 'index']);
         Route::get('/admin/operator-requests/{operatorRequest}', [OperatorRequestController::class, 'show']);

@@ -1,0 +1,164 @@
+{
+	"info": {
+		"_postman_id": "operator-update-postman",
+		"name": "Operator Update Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Update Operator with Image",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer 29|Fr3SWCOuva9QFbxYwtUbcQgu65kUb7jBItwl1RAP71f0aef0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "_method",
+							"value": "PUT",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "Updated Operator Name",
+							"type": "text"
+						},
+						{
+							"key": "contact_email",
+							"value": "contact@example.com",
+							"type": "text"
+						},
+						{
+							"key": "contact_phone",
+							"value": "+1234567890",
+							"type": "text"
+						},
+						{
+							"key": "admin_commission_percentage",
+							"value": "15.5",
+							"type": "text"
+						},
+						{
+							"key": "nid",
+							"value": "123456789",
+							"type": "text"
+						},
+						{
+							"key": "address",
+							"value": "123 Updated Street, City",
+							"type": "text"
+						},
+						{
+							"key": "transport_business_license",
+							"value": "TBL-98765",
+							"type": "text"
+						},
+						{
+							"key": "logo",
+							"type": "file",
+							"src": "/path/to/your/image.jpg",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://ansteches.shop/public/api/operators/1",
+					"protocol": "https",
+					"host": [
+						"ansteches",
+						"shop"
+					],
+					"path": [
+						"public",
+						"api",
+						"operators",
+						"1"
+					]
+				},
+				"description": "Update an operator with all fields including image upload using form-data with method spoofing (_method=PUT)"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Operator (Basic Fields Only)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer 29|Fr3SWCOuva9QFbxYwtUbcQgu65kUb7jBItwl1RAP71f0aef0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "_method",
+							"value": "PUT",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "Updated Operator Name",
+							"type": "text"
+						},
+						{
+							"key": "contact_email",
+							"value": "contact@example.com",
+							"type": "text"
+						},
+						{
+							"key": "contact_phone",
+							"value": "+1234567890",
+							"type": "text"
+						},
+						{
+							"key": "admin_commission_percentage",
+							"value": "15.5",
+							"type": "text"
+						},
+						{
+							"key": "logo",
+							"type": "file",
+							"src": "/path/to/your/image.jpg",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://ansteches.shop/public/api/operators/1",
+					"protocol": "https",
+					"host": [
+						"ansteches",
+						"shop"
+					],
+					"path": [
+						"public",
+						"api",
+						"operators",
+						"1"
+					]
+				},
+				"description": "Update an operator with only basic fields that should exist in all schema versions"
+			},
+			"response": []
+		}
+	]
+}

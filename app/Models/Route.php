@@ -13,7 +13,6 @@ class Route extends Model
         'operator_id',
         'origin',
         'destination',
-        'fare',
         'estimated_travel_time',
         'vehicle_number',
         'time_of_day',
