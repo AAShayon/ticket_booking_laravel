@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Redirect storage requests to the public folder (handle first)
+    RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+    
+    # Redirect API requests to the public folder
+    RewriteRule ^api/(.*)$ public/api/$1 [L]
+    
+    # Redirect all other requests to the public folder
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

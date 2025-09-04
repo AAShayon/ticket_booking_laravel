@@ -1,0 +1,834 @@
+{
+  "info": {
+    "_postman_id": "ansteches-ticket-booking-complete",
+    "name": "Ansteches Ticket Booking API - Complete Collection",
+    "description": "Complete API collection for Laravel Ticket Booking System with authentication and all endpoints.\n\n🔧 **ENVIRONMENT SETUP:**\nThis collection supports both LOCAL and PRODUCTION environments with easy switching.\n\n📍 **Quick Environment Switch:**\n1. **For LOCAL testing:** Set 'current_environment' variable to '{{local_url}}'\n2. **For PRODUCTION testing:** Set 'current_environment' variable to '{{production_url}}'\n\n🌍 **Environment Variables:**\n- production_url: https://ansteches.shop/api\n- local_url: http://127.0.0.1:8001/api\n- current_environment: {{local_url}} (default)\n\n🔐 **Authentication Tokens:**\n- admin_token: Admin user authentication\n- operator_token: Operator user authentication\n- user_token: Regular user authentication\n- auth_token: Current active token (auto-managed)\n\n✅ **COMPLETE API COVERAGE:**\n- 🔐 Authentication (Login/Register/Logout)\n- 👤 User Profile Management\n- 🗺️ Routes (Search & CRUD)\n- 🎫 Bookings (Complete CRUD)\n- 🎟️ Ticket Validation\n- 💳 Payment Integration (All callbacks)\n- 🚌 Vehicle Management (Complete CRUD)\n- 🏢 Operator Management (Complete CRUD - Admin only)\n- 👑 Admin Panel (Users, Bookings, Analytics)\n- 🔑 Password Reset Flow\n\n🚀 **Quick Start:**\n1. Import this collection\n2. Set environment (local/production)\n3. Run 'Login Admin' to get auth token\n4. Test any endpoint with proper authorization\n\n💡 **Pro Tips:**\n- Tokens are automatically managed by login endpoints\n- All CRUD operations are included for completeness\n- Operator management requires admin privileges\n- Use different tokens to test role-based access",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "{{current_environment}}",
+      "type": "string",
+      "description": "Dynamic base URL that switches between local and production"
+    },
+    {
+      "key": "current_environment",
+      "value": "http://127.0.0.1:8001/api",
+      "type": "string",
+      "description": "Switch between local_url and production_url"
+    },
+    {
+      "key": "production_url",
+      "value": "https://ansteches.shop/api",
+      "type": "string",
+      "description": "Production API base URL"
+    },
+    {
+      "key": "local_url",
+      "value": "http://127.0.0.1:8001/api",
+      "type": "string",
+      "description": "Local development API base URL"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string",
+      "description": "Current user authentication token"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string",
+      "description": "Admin user authentication token"
+    },
+    {
+      "key": "operator_token",
+      "value": "",
+      "type": "string",
+      "description": "Operator user authentication token"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string",
+      "description": "Regular user authentication token"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": ["{{base_url}}"],
+              "path": ["register"]
+            }
+          }
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('admin_token', response.access_token);",
+                  "    pm.collectionVariables.set('auth_token', response.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmin@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          }
+        },
+        {
+          "name": "Login Operator",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('operator_token', response.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"operator1@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user_token', response.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/logout",
+              "host": ["{{base_url}}"],
+              "path": ["logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 User Profile",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/user",
+              "host": ["{{base_url}}"],
+              "path": ["user"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Updated Name",
+                  "type": "text"
+                },
+                {
+                  "key": "phone_number",
+                  "value": "+8801700000000",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "updated@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "profile_image",
+                  "type": "file",
+                  "src": "/path/to/your/image.jpg",
+                  "description": "Upload profile image (jpeg, png, jpg, gif, svg, max 2MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/profile",
+              "host": ["{{base_url}}"],
+              "path": ["profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile (JSON - No Image)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone_number\": \"+8801700000000\",\n  \"email\": \"updated@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile",
+              "host": ["{{base_url}}"],
+              "path": ["profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗺️ Routes",
+      "item": [
+        {
+          "name": "Search Routes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/routes/search?origin=Dhaka&destination=Chittagong&journey_date=2025-08-28",
+              "host": ["{{base_url}}"],
+              "path": ["routes", "search"],
+              "query": [
+                {
+                  "key": "origin",
+                  "value": "Dhaka"
+                },
+                {
+                  "key": "destination",
+                  "value": "Chittagong"
+                },
+                {
+                  "key": "journey_date",
+                  "value": "2025-08-28"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Seat Map",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/routes/1/seat-map?journey_date=2025-08-28",
+              "host": ["{{base_url}}"],
+              "path": ["routes", "1", "seat-map"],
+              "query": [
+                {
+                  "key": "journey_date",
+                  "value": "2025-08-28"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Route (Operator/Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"origin\": \"Dhaka\",\n  \"destination\": \"Rajshahi\",\n  \"fare_per_seat\": 25,\n  \"estimated_travel_time\": \"4 hours\",\n  \"departure_time\": \"14:00:00\",\n  \"vehicle_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/routes",
+              "host": ["{{base_url}}"],
+              "path": ["routes"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎫 Bookings",
+      "item": [
+        {
+          "name": "Get User Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_station\": \"Dhaka\",\n  \"to_station\": \"Chittagong\",\n  \"journey_date\": \"2025-08-28\",\n  \"seat_type\": \"AC\",\n  \"number_of_seats\": 2,\n  \"total_fare\": 60,\n  \"route_id\": 1,\n  \"seat_number\": [\"A1\", \"A2\"],\n  \"payment_method\": \"cash\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get Specific Booking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/bookings/1",
+              "host": ["{{base_url}}"],
+              "path": ["bookings", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎟️ Ticket Check",
+      "item": [
+        {
+          "name": "Check Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pnr_number\": \"PNR123456\",\n  \"journey_date\": \"2025-08-28\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ticket/check",
+              "host": ["{{base_url}}"],
+              "path": ["ticket", "check"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Payments",
+      "item": [
+        {
+          "name": "Initiate Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payments/initiate/1",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "initiate", "1"]
+            }
+          }
+        },
+        {
+          "name": "Payment Success Callback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tran_id\": \"TRX_123456789\",\n  \"status\": \"VALID\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/success",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "success"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚌 Vehicles",
+      "item": [
+        {
+          "name": "Get Operator Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vehicles",
+              "host": ["{{base_url}}"],
+              "path": ["vehicles"]
+            }
+          }
+        },
+        {
+          "name": "Create Vehicle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model_number\": \"Mercedes Benz O500RS\",\n  \"type\": \"AC\",\n  \"capacity\": 42,\n  \"vehicle_number\": \"DHAKA-METRO-B-11-9999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vehicles",
+              "host": ["{{base_url}}"],
+              "path": ["vehicles"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 Operators",
+      "item": [
+        {
+          "name": "Get Public Operators",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/operators/public",
+              "host": ["{{base_url}}"],
+              "path": ["operators", "public"]
+            }
+          }
+        },
+        {
+          "name": "Get All Operators (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/operators",
+              "host": ["{{base_url}}"],
+              "path": ["operators"]
+            }
+          }
+        },
+        {
+          "name": "Create Operator (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Operator Company\",\n  \"contact_email\": \"contact@newoperator.com\",\n  \"contact_phone\": \"+8801700000000\",\n  \"admin_commission_percentage\": 10.00,\n  \"vehicles\": [\n    {\n      \"model_number\": \"AC-001\",\n      \"type\": \"AC\",\n      \"capacity\": 40\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/operators",
+              "host": ["{{base_url}}"],
+              "path": ["operators"]
+            }
+          }
+        },
+        {
+          "name": "Update Operator (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Operator Name\",\n  \"admin_commission_percentage\": 15.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/operators/1",
+              "host": ["{{base_url}}"],
+              "path": ["operators", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Operator (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/operators/1",
+              "host": ["{{base_url}}"],
+              "path": ["operators", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👑 Admin",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/users",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "Get All Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Daily Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/daily-summery",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "daily-summery"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔑 Password Reset",
+      "item": [
+        {
+          "name": "Request OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forgot-password/request-otp",
+              "host": ["{{base_url}}"],
+              "path": ["forgot-password", "request-otp"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\",\n  \"password\": \"newpassword123\",\n  \"password_confirmation\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forgot-password/reset",
+              "host": ["{{base_url}}"],
+              "path": ["forgot-password", "reset"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

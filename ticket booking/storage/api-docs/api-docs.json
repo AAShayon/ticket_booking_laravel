@@ -1,0 +1,4330 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Ticket Booking System API Documentation",
+        "description": "API documentation for the Ticket Booking System backend.\n\n**Test Credentials:**\n- **Admin:** `superadmin@example.com` / `password`\n- **Operator Owner 1:** `operator1@example.com` / `password`\n- **Operator Owner 2:** `operator2@example.com` / `password`\n- **Regular User:** `user@example.com` / `password`",
+        "contact": {
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://172.168.0.132:8000",
+            "description": "Ticket Booking System API Server"
+        }
+    ],
+    "paths": {
+        "/admin/users": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get all users (Admin only)",
+                "operationId": "afab67256b9405de17d3e13f2eae9c4e",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AdminUser"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/users?page=1"
+                                        },
+                                        "from": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/users?page=1"
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/users?page=2"
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/users"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "example": null
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 15
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Create a new user (Admin only)",
+                "operationId": "096428f5a3b73c7535b724cfc91b53b5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "New Admin"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "newadmin@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "user",
+                                            "admin"
+                                        ],
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminUser"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/users/{user}": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get a specific user by ID (Admin only)",
+                "operationId": "d23e2f3d9fab6a72e9851800490633b6",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminUser"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update an existing user (Admin only)",
+                "operationId": "53389c40d1fb113820fa9ffbcfc544b4",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Name"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "updated@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "new_password"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "user",
+                                            "admin"
+                                        ],
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminUser"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Delete a user (Admin only)",
+                "operationId": "a11154970ac963d09992c64fddc6b6d0",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "User deleted successfully"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/bookings": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get all bookings (Admin only)",
+                "description": "Retrieves a paginated list of all bookings in the system. Includes user_id and pnr_number directly in the booking object.",
+                "operationId": "67a5de392c293c3e74d1e5403af20b82",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "from_station": {
+                                                        "type": "string",
+                                                        "example": "Dhaka"
+                                                    },
+                                                    "to_station": {
+                                                        "type": "string",
+                                                        "example": "Chittagong"
+                                                    },
+                                                    "journey_date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-12-25"
+                                                    },
+                                                    "seat_type": {
+                                                        "type": "string",
+                                                        "example": "Economy"
+                                                    },
+                                                    "number_of_seats": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "seat_number": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "example": [
+                                                            "A1",
+                                                            "A2"
+                                                        ]
+                                                    },
+                                                    "total_fare": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "confirmed"
+                                                    },
+                                                    "payment_method": {
+                                                        "type": "string",
+                                                        "example": "cash"
+                                                    },
+                                                    "payment_name": {
+                                                        "type": "string",
+                                                        "example": "Cash"
+                                                    },
+                                                    "transaction_id": {
+                                                        "type": "string",
+                                                        "example": "txn_123",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-01-01T00:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-01-01T00:00:00Z"
+                                                    },
+                                                    "route_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "pnr_number": {
+                                                        "description": "PNR number if generated",
+                                                        "type": "string",
+                                                        "example": "ABCDEF",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/bookings?page=1"
+                                        },
+                                        "from": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/bookings?page=1"
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/api/admin/bookings"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/bookings/{booking}/status": {
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update booking status (Admin only)",
+                "description": "Updates the status of a booking. If a pending cash booking is confirmed, a PNR will be generated.",
+                "operationId": "f8c648a237f8e7b1a8fd1dc96f2b2be4",
+                "parameters": [
+                    {
+                        "name": "booking",
+                        "in": "path",
+                        "description": "ID of the booking to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "confirmed",
+                                            "cancelled"
+                                        ],
+                                        "example": "confirmed"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Booking status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Booking"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Booking not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/bookings/{booking}": {
+            "delete": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Delete a booking (Admin only)",
+                "operationId": "c823fbbba4a338aa7794e6c4e29343e2",
+                "parameters": [
+                    {
+                        "name": "booking",
+                        "in": "path",
+                        "description": "ID of the booking to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Booking deleted successfully"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Booking not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/daily-summery": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get a daily summary for the admin dashboard.",
+                "operationId": "e4118299953990b204f1b3535e5c478e",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "metrics": {
+                                            "properties": {
+                                                "new_users_today": {
+                                                    "type": "integer",
+                                                    "example": 42
+                                                },
+                                                "pending_operator_requests": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "total_bookings": {
+                                                    "type": "integer",
+                                                    "example": 128
+                                                },
+                                                "todays_revenue": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 3420.5
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "recent_activities": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "new_booking"
+                                                    },
+                                                    "text": {
+                                                        "type": "string",
+                                                        "example": "New booking: PNR784523"
+                                                    },
+                                                    "timestamp": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-08-16T10:32:15.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/recent-activities": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get all recent activities with pagination.",
+                "operationId": "dfea698f1bff7c876419e47f2bbcd198",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page (5, 10, 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15,
+                            "enum": [
+                                5,
+                                10,
+                                15
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "new_booking"
+                                                    },
+                                                    "text": {
+                                                        "type": "string",
+                                                        "example": "New booking: PNR784523"
+                                                    },
+                                                    "timestamp": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-08-16T10:32:15.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/admin/recent-activities?page=1"
+                                        },
+                                        "from": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/admin/recent-activities?page=1"
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "example": null
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/admin/recent-activities"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "example": null
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 10
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "operationId": "5d4fa5d5607ed675ba93907e1fc94534",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.doe@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User registered successfully"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|abcdefghijklmnopqrstuvwxyz"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Authenticate user and return token",
+                "operationId": "67d6d0fdd54fba132e1b6f55ca254183",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.doe@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|abcdefghijklmnopqrstuvwxyz"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid login details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid login details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout authenticated user",
+                "operationId": "28d48c13fca984400ac8de99f54ee13a",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/bookings": {
+            "get": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Get all bookings for the authenticated user",
+                "operationId": "b89b932c131e727a3720a01899acd0a2",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BookingList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Create a new booking",
+                "description": "Creates a new booking. Admin/Operator bookings are auto-confirmed. Regular user bookings are confirmed for online payments, pending for cash payments. Includes seat validation to prevent overbooking.",
+                "operationId": "166547aa028b063e31d6efe9c093aa88",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "from_station",
+                                    "to_station",
+                                    "journey_date",
+                                    "seat_type",
+                                    "number_of_seats",
+                                    "total_fare",
+                                    "seat_number",
+                                    "payment_method",
+                                    "payment_name"
+                                ],
+                                "properties": {
+                                    "from_station": {
+                                        "type": "string",
+                                        "example": "Dhaka"
+                                    },
+                                    "to_station": {
+                                        "type": "string",
+                                        "example": "Chittagong"
+                                    },
+                                    "journey_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-30"
+                                    },
+                                    "seat_type": {
+                                        "type": "string",
+                                        "example": "Economy"
+                                    },
+                                    "number_of_seats": {
+                                        "description": "Number of seats requested. Must match the count of 'seat_number' array.",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "total_fare": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 250
+                                    },
+                                    "route_id": {
+                                        "description": "ID of the route for the booking.",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "seat_number": {
+                                        "description": "Array of specific seat numbers to book. Must match 'number_of_seats' count and contain unique, available seats.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "A1"
+                                        ]
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "cash",
+                                            "online"
+                                        ],
+                                        "example": "online"
+                                    },
+                                    "payment_name": {
+                                        "description": "e.g., Cash, Stripe, PayPal",
+                                        "type": "string",
+                                        "example": "Stripe"
+                                    },
+                                    "transaction_id": {
+                                        "description": "Required if payment_method is 'online'",
+                                        "type": "string",
+                                        "example": "txn_123abc",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Booking created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Booking"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or seat booking error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "seat_number": [
+                                                    "The seat number field is required."
+                                                ]
+                                            }
+                                        },
+                                        "custom_message": {
+                                            "description": "Custom error message for seat validation issues",
+                                            "type": "string",
+                                            "example": "Not enough seats available for this route and date."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/bookings/{id}": {
+            "get": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Get a specific booking by ID",
+                "description": "Retrieves a specific booking by ID, including associated PNR, Route, Vehicle, and Operator details.",
+                "operationId": "9a7e24b15b1f9fe6c357532b3c5200a3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the booking to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Booking"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Booking not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Update a specific booking by ID",
+                "operationId": "620746af203837311ea0dd4fca355623",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the booking to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "from_station": {
+                                        "type": "string",
+                                        "example": "Station E"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "confirmed"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Booking updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Booking"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Booking not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Delete a specific booking by ID",
+                "operationId": "b14ac6c3aa1a450e338f1424cc7d7168",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the booking to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Booking deleted successfully"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Booking not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/forgot-password/request-otp": {
+            "post": {
+                "tags": [
+                    "Forgot Password"
+                ],
+                "summary": "Request OTP for password reset",
+                "operationId": "8ac11c2ad5a1169198399c32536a79b5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "type": "string",
+                                        "example": "user@example.com or +8801XXXXXXXXX"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP sent to your identifier."
+                                        },
+                                        "otp": {
+                                            "description": "For testing purposes only. In production, this would be sent via email/SMS.",
+                                            "type": "string",
+                                            "example": "123456"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found with this identifier."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/forgot-password/verify-otp": {
+            "post": {
+                "tags": [
+                    "Forgot Password"
+                ],
+                "summary": "Verify OTP and get password reset token",
+                "operationId": "6f712919b4697a972ef9eca413853086",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "type": "string",
+                                        "example": "user@example.com or +8801XXXXXXXXX"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP verified. You can now reset your password."
+                                        },
+                                        "reset_token": {
+                                            "type": "string",
+                                            "example": "some_long_random_string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid or expired OTP."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/forgot-password/reset": {
+            "post": {
+                "tags": [
+                    "Forgot Password"
+                ],
+                "summary": "Reset user password",
+                "operationId": "eaa015a7e30624ca6c61fd426ed2ab74",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reset_token",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "reset_token": {
+                                        "type": "string",
+                                        "example": "some_long_random_string"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "new_secure_password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "new_secure_password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password has been reset successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired reset token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid or expired reset token."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/operators": {
+            "get": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Get all bus operators (Admin only)",
+                "operationId": "b542fbe4e0ca4a01b41954e1754dcc45",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Create a new bus operator (Admin only)",
+                "operationId": "206ab19bdc3e167630fb2e0e33fb6194",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Green Line Paribahan"
+                                    },
+                                    "contact_email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "contact@greenline.com"
+                                    },
+                                    "contact_phone": {
+                                        "type": "string",
+                                        "example": "+8801XXXXXXXXX"
+                                    },
+                                    "admin_commission_percentage": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10
+                                    },
+                                    "nid": {
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Main St, City"
+                                    },
+                                    "transport_business_license": {
+                                        "type": "string",
+                                        "example": "TBL-12345"
+                                    },
+                                    "logo": {
+                                        "description": "Operator logo image",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "vehicles": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "model_number": {
+                                                    "type": "string",
+                                                    "example": "SR112233"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "AC",
+                                                        "non-AC",
+                                                        "sleeper",
+                                                        "hyundai",
+                                                        "scania"
+                                                    ],
+                                                    "example": "AC"
+                                                },
+                                                "capacity": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Operator created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Operator"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/operators/public": {
+            "get": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Get all bus operators (Publicly accessible)",
+                "operationId": "ac2af0682ae6b77c531e93802b1e4e57",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorList"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/operators/{id}": {
+            "get": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Get a specific bus operator by ID (Admin only)",
+                "operationId": "939c60b1f2cb60475022d48f6a99bb5b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Operator"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Update a specific bus operator by ID (Admin only)",
+                "operationId": "6c4b5ac86ffdcdc5bc1749324b105aee",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Green Line Paribahan Updated"
+                                    },
+                                    "admin_commission_percentage": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 12.5
+                                    },
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nid": {
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Main St, City"
+                                    },
+                                    "transport_business_license": {
+                                        "type": "string",
+                                        "example": "TBL-12345"
+                                    },
+                                    "logo": {
+                                        "description": "Operator logo image",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Operator updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Operator"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Operators"
+                ],
+                "summary": "Delete a bus operator by ID (Admin only)",
+                "operationId": "7e31bf66537f491aa6548845c454762c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Operator deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/operator-requests": {
+            "post": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Submit a new operator request",
+                "operationId": "33c733cef4e69951ff636000e048991e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "operator_name",
+                                    "route_details",
+                                    "fare_details",
+                                    "admin_commission_percentage"
+                                ],
+                                "properties": {
+                                    "operator_name": {
+                                        "type": "string",
+                                        "example": "New Bus Operator"
+                                    },
+                                    "route_details": {
+                                        "type": "string",
+                                        "example": "Dhaka to Sylhet"
+                                    },
+                                    "fare_details": {
+                                        "type": "string",
+                                        "example": "BDT 1000"
+                                    },
+                                    "admin_commission_percentage": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Operator request submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequest"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/operator-requests/my": {
+            "get": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Get all operator requests for the authenticated user",
+                "operationId": "ef54b7b5acc2e7a0b82aa2e3f5a79ddb",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequestList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/operator-requests": {
+            "get": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Get all operator requests (Admin only)",
+                "operationId": "c0a07c7614ecf58b698634b5ff19408b",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequestList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/operator-requests/{id}": {
+            "get": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Get a specific operator request by ID (Admin only)",
+                "operationId": "0788b78a86aa8b6945e9ebf27195df8a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator request to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequest"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator request not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/operator-requests/{id}/approve": {
+            "post": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Approve an operator request (Admin only)",
+                "operationId": "2eb9652021ed33c2a23e7ebe5405bc06",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator request to approve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operator request approved and operator created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Operator request approved and operator created"
+                                        },
+                                        "operator": {
+                                            "$ref": "#/components/schemas/Operator"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator request not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/operator-requests/{id}/reject": {
+            "post": {
+                "tags": [
+                    "Operator Requests"
+                ],
+                "summary": "Reject an operator request (Admin only)",
+                "operationId": "f5fe039b979d88955de46bc02fa69b3e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the operator request to reject",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operator request rejected",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorRequest"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Operator request not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/payments/initiate/{booking}": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Initiate a payment for a booking",
+                "operationId": "a7e1212ce49ef8a3f063ecb8899eb7b5",
+                "parameters": [
+                    {
+                        "name": "booking",
+                        "in": "path",
+                        "description": "ID of the booking to initiate payment for",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment initiated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment initiated"
+                                        },
+                                        "payment_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "transaction_id": {
+                                            "type": "string",
+                                            "example": "TRX_abcdef12345"
+                                        },
+                                        "amount": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 150
+                                        },
+                                        "redirect_url": {
+                                            "type": "string",
+                                            "example": "http://example.com/sslcommerz-payment-gateway?trxid=TRX_abcdef12345"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Booking not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/payments/success": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Callback URL for successful payments",
+                "operationId": "957daca4c48399650b873aa23bdf3c25",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tran_id"
+                                ],
+                                "properties": {
+                                    "tran_id": {
+                                        "type": "string",
+                                        "example": "TRX_abcdef12345"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Payment"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found"
+                    }
+                }
+            }
+        },
+        "/payments/fail": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Callback URL for failed payments",
+                "operationId": "56d13fc8cc1089c784f6b299bbaf3245",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tran_id"
+                                ],
+                                "properties": {
+                                    "tran_id": {
+                                        "type": "string",
+                                        "example": "TRX_abcdef12345"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Payment"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found"
+                    }
+                }
+            }
+        },
+        "/payments/cancel": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Callback URL for cancelled payments",
+                "operationId": "c23ba32ea1cfa5ef4348b781753c58ee",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tran_id"
+                                ],
+                                "properties": {
+                                    "tran_id": {
+                                        "type": "string",
+                                        "example": "TRX_abcdef12345"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment cancelled",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Payment"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found"
+                    }
+                }
+            }
+        },
+        "/payments/ipn": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Callback URL for Instant Payment Notification (IPN)",
+                "operationId": "f7827da06d9216c802f0edb7c57100c9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tran_id"
+                                ],
+                                "properties": {
+                                    "tran_id": {
+                                        "type": "string",
+                                        "example": "TRX_abcdef12345"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "IPN received and processed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "IPN received and processed"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found"
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Update authenticated user's profile",
+                "operationId": "42803079b1b23a321f57eae40c98b303",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jane Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane.doe@example.com"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+8801XXXXXXXXX",
+                                        "nullable": true
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "new_password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "new_password"
+                                    },
+                                    "profile_image": {
+                                        "description": "Profile image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "last_login_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-01-01T00:00:00.000000Z",
+                                        "nullable": true
+                                    },
+                                    "total_bookings": {
+                                        "type": "integer",
+                                        "readOnly": true,
+                                        "example": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile updated successfully"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/AdminUser"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/routes": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get all bus routes (Admin only)",
+                "operationId": "c68358eb774e93b2568381321560fad2",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BusRouteList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Create a new bus route (Admin only)",
+                "operationId": "59805421dd9044f42e1812a773e56cd0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "operator_id",
+                                    "vehicle_id",
+                                    "origin",
+                                    "destination",
+                                    "fare",
+                                    "fare_per_seat",
+                                    "estimated_travel_time",
+                                    "vehicle_number",
+                                    "time_of_day",
+                                    "departure_time"
+                                ],
+                                "properties": {
+                                    "operator_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "vehicle_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "origin": {
+                                        "type": "string",
+                                        "example": "Dhaka"
+                                    },
+                                    "destination": {
+                                        "type": "string",
+                                        "example": "Chittagong"
+                                    },
+                                    "fare": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1200
+                                    },
+                                    "fare_per_seat": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 500
+                                    },
+                                    "estimated_travel_time": {
+                                        "type": "string",
+                                        "example": "6 hours"
+                                    },
+                                    "vehicle_number": {
+                                        "type": "string",
+                                        "example": "ABC-123"
+                                    },
+                                    "time_of_day": {
+                                        "type": "string",
+                                        "example": "morning"
+                                    },
+                                    "departure_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "06:30:00"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Route created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BusRoute"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/routes/public": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get all bus routes (Publicly accessible)",
+                "description": "Retrieves a list of publicly accessible bus routes. Supports filtering by origin, destination, fare range, vehicle type, time of day, and journey date. If journey_date is provided, available seats are calculated and routes with no available seats are excluded.",
+                "operationId": "015d6e3fecad6f1418651fdacf37ee20",
+                "parameters": [
+                    {
+                        "name": "origin",
+                        "in": "query",
+                        "description": "Origin station (partial match)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "destination",
+                        "in": "query",
+                        "description": "Destination station (partial match)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "minFare",
+                        "in": "query",
+                        "description": "Minimum fare per seat",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "maxFare",
+                        "in": "query",
+                        "description": "Maximum fare per seat",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Vehicle type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ac",
+                                "non-ac",
+                                "sleeper",
+                                "hyundai",
+                                "scania",
+                                "volvo"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "time_of_day",
+                        "in": "query",
+                        "description": "Time of day for departure",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "morning",
+                                "afternoon",
+                                "evening",
+                                "night",
+                                "am",
+                                "pm"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "journey_date",
+                        "in": "query",
+                        "description": "Date of journey (YYYY-MM-DD). If provided, available seats are calculated and routes with no availability are excluded.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-09-20"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BusRoute"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/routes/{id}": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get a specific bus route by ID (Admin only)",
+                "operationId": "9cd1462e95a599838ac04f474f8bdc41",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the route to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BusRoute"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Update a specific bus route by ID (Admin only)",
+                "operationId": "8d3291cf5bc60fcde0f0767baca12d50",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the route to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "origin": {
+                                        "type": "string",
+                                        "example": "Sylhet"
+                                    },
+                                    "fare": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1500
+                                    },
+                                    "vehicle_number": {
+                                        "type": "string",
+                                        "example": "XYZ-789"
+                                    },
+                                    "time_of_day": {
+                                        "type": "string",
+                                        "example": "evening"
+                                    },
+                                    "departure_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "18:00:00"
+                                    },
+                                    "vehicle_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "fare_per_seat": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 500
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Route updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BusRoute"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Delete a bus route by ID (Admin only)",
+                "operationId": "584ff9a6d16d1381447f6dcd100c4eb7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the route to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Route deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/routes/search": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Search for available bus routes",
+                "operationId": "bd1c41ef02038c34f54d1e8ecbb18155",
+                "parameters": [
+                    {
+                        "name": "origin",
+                        "in": "query",
+                        "description": "Origin station",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "destination",
+                        "in": "query",
+                        "description": "Destination station",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "journey_date",
+                        "in": "query",
+                        "description": "Date of journey (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "departure_time",
+                        "in": "query",
+                        "description": "Departure time (HH:MM:SS)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "time"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "operator_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "origin": {
+                                                "type": "string",
+                                                "example": "Dhaka"
+                                            },
+                                            "destination": {
+                                                "type": "string",
+                                                "example": "Chittagong"
+                                            },
+                                            "fare": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 1200
+                                            },
+                                            "fare_per_seat": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 500
+                                            },
+                                            "estimated_travel_time": {
+                                                "type": "string",
+                                                "example": "6 hours"
+                                            },
+                                            "vehicle_number": {
+                                                "type": "string",
+                                                "example": "ABC-123"
+                                            },
+                                            "time_of_day": {
+                                                "type": "string",
+                                                "example": "morning"
+                                            },
+                                            "departure_time": {
+                                                "type": "string",
+                                                "format": "time",
+                                                "example": "06:30:00"
+                                            },
+                                            "available_seats": {
+                                                "type": "integer",
+                                                "example": 30
+                                            },
+                                            "vehicle_model": {
+                                                "type": "string",
+                                                "example": "Scania K360"
+                                            },
+                                            "vehicle_type": {
+                                                "type": "string",
+                                                "example": "AC"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/routes/{route}/seat-map": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get seat map for a specific route and journey date",
+                "operationId": "3373b29b6e50d732fa35d2679dfbbd4d",
+                "parameters": [
+                    {
+                        "name": "route",
+                        "in": "path",
+                        "description": "ID of the route",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "journey_date",
+                        "in": "query",
+                        "description": "Date of journey (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-08-20"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_capacity": {
+                                            "type": "integer",
+                                            "example": 40
+                                        },
+                                        "booked_seats_count": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "available_seats_count": {
+                                            "type": "integer",
+                                            "example": 35
+                                        },
+                                        "seat_map": {
+                                            "description": "Key-value pairs of seat number and status (booked/available)",
+                                            "type": "object",
+                                            "example": {
+                                                "A1": "booked",
+                                                "A2": "available",
+                                                "B1": "booked"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/ticket/check": {
+            "post": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Check ticket details by PNR",
+                "operationId": "a577d64512c6189782409ae4c227eb97",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "pnr_number",
+                                    "journey_date"
+                                ],
+                                "properties": {
+                                    "pnr_number": {
+                                        "type": "string",
+                                        "example": "ABCDEF"
+                                    },
+                                    "journey_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-25"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ticket details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Booking"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ticket not found"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/vehicles": {
+            "get": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Get all vehicles for the authenticated operator",
+                "operationId": "f627fb85543e356532922246d50e6e2a",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VehicleList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Create a new vehicle for the authenticated operator",
+                "operationId": "3b250a933fc5648aedd688fdcf4eae81",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "model_number",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "model_number": {
+                                        "type": "string",
+                                        "example": "Scania K360"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "ac",
+                                            "sleeper",
+                                            "non-ac",
+                                            "hyundai",
+                                            "scania",
+                                            "volvo"
+                                        ],
+                                        "example": "ac"
+                                    },
+                                    "capacity": {
+                                        "type": "integer",
+                                        "example": 40
+                                    },
+                                    "image": {
+                                        "description": "Vehicle image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Vehicle created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vehicle"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/vehicles": {
+            "get": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Get all vehicles (Admin only)",
+                "operationId": "4d0d6a894efb3ecece585cc9be6deba6",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VehicleList"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/vehicles/{id}": {
+            "get": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Get a specific vehicle by ID for the authenticated operator",
+                "operationId": "00b76a563ae78ef08e92480a3cd58a9e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the vehicle to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vehicle"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Vehicle not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Update a specific vehicle by ID for the authenticated operator",
+                "operationId": "322797dc21f323e627fc60773b7130c6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the vehicle to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "model_number": {
+                                        "type": "string",
+                                        "example": "Volvo 9700"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "ac",
+                                            "sleeper",
+                                            "non-ac",
+                                            "hyundai",
+                                            "scania",
+                                            "volvo"
+                                        ],
+                                        "example": "sleeper"
+                                    },
+                                    "capacity": {
+                                        "type": "integer",
+                                        "example": 28
+                                    },
+                                    "image": {
+                                        "description": "Vehicle image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Vehicle updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vehicle"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Vehicle not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Vehicles"
+                ],
+                "summary": "Delete a specific vehicle by ID for the authenticated operator",
+                "operationId": "7fbf332babe156123bfa2b84d32bb68a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the vehicle to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Vehicle deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Vehicle not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AdminUser": {
+                "title": "Admin User",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Admin User"
+                            },
+                            "email": {
+                                "type": "string",
+                                "format": "email",
+                                "example": "admin@example.com"
+                            },
+                            "phone_number": {
+                                "type": "string",
+                                "example": "+8801XXXXXXXXX",
+                                "nullable": true
+                            },
+                            "profile_image": {
+                                "type": "string",
+                                "example": "uploads/profile.jpg",
+                                "nullable": true
+                            },
+                            "role": {
+                                "type": "string",
+                                "example": "admin"
+                            },
+                            "last_login_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z",
+                                "nullable": true
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "AdminUserList": {
+                "title": "Admin User List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/AdminUser"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
+            "AdminBookingList": {
+                "title": "Admin Booking List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/Booking"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
+            "Pnr": {
+                "title": "PNR",
+                "description": "PNR (Passenger Name Record) details",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "booking_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "pnr_number": {
+                                "type": "string",
+                                "example": "ABCDEF"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "Booking": {
+                "title": "Booking",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "user_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "from_station": {
+                                "type": "string",
+                                "example": "Station A"
+                            },
+                            "to_station": {
+                                "type": "string",
+                                "example": "Station B"
+                            },
+                            "journey_date": {
+                                "type": "string",
+                                "format": "date",
+                                "example": "2025-12-25"
+                            },
+                            "seat_type": {
+                                "type": "string",
+                                "example": "Economy"
+                            },
+                            "number_of_seats": {
+                                "type": "integer",
+                                "example": 2
+                            },
+                            "seat_number": {
+                                "description": "Array of selected seat numbers",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "A1",
+                                    "A2"
+                                ]
+                            },
+                            "total_fare": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 100
+                            },
+                            "status": {
+                                "type": "string",
+                                "example": "pending"
+                            },
+                            "payment_method": {
+                                "type": "string",
+                                "enum": [
+                                    "cash",
+                                    "online"
+                                ],
+                                "example": "online"
+                            },
+                            "payment_name": {
+                                "description": "e.g., Cash, Stripe, PayPal",
+                                "type": "string",
+                                "example": "Stripe"
+                            },
+                            "transaction_id": {
+                                "type": "string",
+                                "example": "txn_123abc",
+                                "nullable": true
+                            },
+                            "pnr_number": {
+                                "description": "PNR number generated for confirmed bookings",
+                                "type": "string",
+                                "example": "ABCDEF",
+                                "nullable": true
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "route": {
+                                "$ref": "#/components/schemas/BusRoute"
+                            },
+                            "vehicle": {
+                                "$ref": "#/components/schemas/Vehicle"
+                            },
+                            "operator": {
+                                "$ref": "#/components/schemas/Operator"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "BookingList": {
+                "title": "Booking List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/Booking"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
+            "Operator": {
+                "title": "Operator",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Green Line Paribahan"
+                            },
+                            "contact_email": {
+                                "type": "string",
+                                "format": "email",
+                                "example": "contact@greenline.com"
+                            },
+                            "contact_phone": {
+                                "type": "string",
+                                "example": "+8801XXXXXXXXX"
+                            },
+                            "admin_commission_percentage": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 10
+                            },
+                            "user_id": {
+                                "description": "ID of the user who owns/manages this operator",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "nid": {
+                                "type": "string",
+                                "example": "1234567890"
+                            },
+                            "address": {
+                                "type": "string",
+                                "example": "123 Main St, City"
+                            },
+                            "transport_business_license": {
+                                "type": "string",
+                                "example": "TBL-12345"
+                            },
+                            "logo": {
+                                "type": "string",
+                                "example": "uploads/logos/greenline.png",
+                                "nullable": true
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "OperatorList": {
+                "title": "Operator List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/Operator"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
+            "OperatorRequest": {
+                "title": "Operator Request",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "user_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "operator_name": {
+                                "type": "string",
+                                "example": "New Bus Operator"
+                            },
+                            "route_details": {
+                                "type": "string",
+                                "example": "Dhaka to Chittagong"
+                            },
+                            "fare_details": {
+                                "type": "string",
+                                "example": "BDT 1200"
+                            },
+                            "admin_commission_percentage": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 10
+                            },
+                            "status": {
+                                "type": "string",
+                                "enum": [
+                                    "pending",
+                                    "approved",
+                                    "rejected"
+                                ],
+                                "example": "pending"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "OperatorRequestList": {
+                "title": "Operator Request List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/OperatorRequest"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
+            "Payment": {
+                "title": "Payment",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "booking_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "transaction_id": {
+                                "type": "string",
+                                "example": "TRX_123456789"
+                            },
+                            "amount": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 150
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "BDT"
+                            },
+                            "status": {
+                                "type": "string",
+                                "example": "pending"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "BusRoute": {
+                "title": "Bus Route",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "operator_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "origin": {
+                                "type": "string",
+                                "example": "Dhaka"
+                            },
+                            "destination": {
+                                "type": "string",
+                                "example": "Chittagong"
+                            },
+                            "fare": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 1200
+                            },
+                            "estimated_travel_time": {
+                                "type": "string",
+                                "example": "6 hours"
+                            },
+                            "vehicle_number": {
+                                "type": "string",
+                                "example": "ABC-123"
+                            },
+                            "time_of_day": {
+                                "type": "string",
+                                "example": "morning"
+                            },
+                            "departure_time": {
+                                "type": "string",
+                                "format": "time",
+                                "example": "06:30:00"
+                            },
+                            "vehicle_id": {
+                                "description": "ID of the vehicle assigned to this route",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "fare_per_seat": {
+                                "description": "Fare per seat for this route",
+                                "type": "number",
+                                "format": "float",
+                                "example": 500
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "available_seats": {
+                                "description": "Number of available seats for a given journey_date (if provided in search)",
+                                "type": "integer",
+                                "example": 30
+                            },
+                            "vehicle_model": {
+                                "description": "Model number of the vehicle",
+                                "type": "string",
+                                "example": "Volvo B11R"
+                            },
+                            "vehicle_type": {
+                                "description": "Type of the vehicle (e.g., AC, non-AC)",
+                                "type": "string",
+                                "example": "AC"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "BusRouteList": {
+                "title": "Bus Route List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/BusRoute"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
+            "Vehicle": {
+                "title": "Vehicle",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "operator_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1
+                            },
+                            "model_number": {
+                                "type": "string",
+                                "example": "Scania K360"
+                            },
+                            "type": {
+                                "type": "string",
+                                "example": "AC"
+                            },
+                            "capacity": {
+                                "type": "integer",
+                                "example": 40
+                            },
+                            "image": {
+                                "type": "string",
+                                "example": "uploads/vehicles/bus.png",
+                                "nullable": true
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-01-01T00:00:00.000000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "VehicleList": {
+                "title": "Vehicle List",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/Vehicle"
+                },
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ValidationError"
+                    }
+                ]
+            },
+            "ValidationError": {
+                "title": "Validation Error",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "bearerAuth",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Admin",
+            "description": "API Endpoints for Admin Management"
+        },
+        {
+            "name": "Authentication",
+            "description": "API Endpoints for User Authentication"
+        },
+        {
+            "name": "Bookings",
+            "description": "API Endpoints for Booking Management"
+        },
+        {
+            "name": "Forgot Password",
+            "description": "API Endpoints for Forgot Password functionality"
+        },
+        {
+            "name": "Operators",
+            "description": "API Endpoints for Bus Operator Management (Admin Only)"
+        },
+        {
+            "name": "Operator Requests",
+            "description": "API Endpoints for Managing Bus Operator Requests"
+        },
+        {
+            "name": "Payments",
+            "description": "API Endpoints for Payment Processing"
+        },
+        {
+            "name": "Profile",
+            "description": "API Endpoints for User Profile Management"
+        },
+        {
+            "name": "Routes",
+            "description": "API Endpoints for Bus Route Management (Admin Only)"
+        },
+        {
+            "name": "Tickets",
+            "description": "API Endpoints for Ticket Management"
+        },
+        {
+            "name": "Vehicles",
+            "description": "API Endpoints for Vehicle Management (Operator Only)"
+        }
+    ]
+}
